@@ -38,36 +38,36 @@ export function FreemiumWall({ usedCount, onUpgrade, onClose }: FreemiumWallProp
           </button>
         )}
 
-        {/* Banner Gradiente */}
-        <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 px-6 pt-8 pb-6 text-center relative overflow-hidden">
+        {/* Banner Gradiente Esmeralda de Marca */}
+        <div className="bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700 px-6 pt-8 pb-6 text-center relative overflow-hidden">
           {/* Decoración de fondo */}
-          <div className="absolute -top-8 -right-8 w-40 h-40 bg-white/5 rounded-full" />
-          <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-white/5 rounded-full" />
+          <div className="absolute -top-8 -right-8 w-40 h-40 bg-white/10 rounded-full" />
+          <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-white/10 rounded-full" />
 
           <div className="relative">
             <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-white/15 backdrop-blur flex items-center justify-center border border-white/20 shadow-inner">
-              <Crown className="text-yellow-300" size={30} />
+              <Crown className="text-amber-300 fill-amber-300" size={30} />
             </div>
 
             {isLimitReached ? (
               <>
                 <div className="inline-flex items-center gap-1.5 bg-white/15 text-white text-[11px] font-bold px-3 py-1 rounded-full mb-3 border border-white/20">
-                  <Zap size={11} className="text-yellow-300 animate-pulse" />
+                  <Zap size={11} className="text-amber-300 animate-pulse" />
                   LÍMITE ALCANZADO
                 </div>
-                <h2 className="text-2xl font-black text-white mb-1">¡Pasa a Pro!</h2>
-                <p className="text-white/85 text-sm leading-relaxed">
+                <h2 className="text-2xl font-black text-white mb-1 tracking-tight">¡Pasa a Pro!</h2>
+                <p className="text-white/90 text-sm leading-relaxed font-medium">
                   Has alcanzado el límite de <strong className="text-white font-black">{FREE_QUOTA_LIMIT}</strong> documentos gratuitos de este mes.
                 </p>
               </>
             ) : (
               <>
                 <div className="inline-flex items-center gap-1.5 bg-white/15 text-white text-[11px] font-bold px-3 py-1 rounded-full mb-3 border border-white/20">
-                  <Star size={11} className="text-yellow-300" />
+                  <Star size={11} className="text-amber-300" />
                   PLANES & PRECIOS PRO
                 </div>
-                <h2 className="text-2xl font-black text-white mb-1">¡Pasa a Pro!</h2>
-                <p className="text-white/85 text-sm leading-relaxed">
+                <h2 className="text-2xl font-black text-white mb-1 tracking-tight">¡Pasa a Pro!</h2>
+                <p className="text-white/90 text-sm leading-relaxed font-medium">
                   Cotizaciones e impresiones ilimitadas, sin marca de agua y con respaldo en la nube.
                 </p>
               </>
@@ -85,16 +85,16 @@ export function FreemiumWall({ usedCount, onUpgrade, onClose }: FreemiumWallProp
                 key={cycle}
                 type="button"
                 onClick={() => setBillingCycle(cycle)}
-                className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   billingCycle === cycle
                     ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
                     : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
-                {cycle === 'annual' && <Star size={12} className="text-yellow-500" />}
+                {cycle === 'annual' && <Star size={12} className="text-amber-500 fill-amber-500" />}
                 {plans[cycle].label}
                 {cycle === 'annual' && (
-                  <span className="ml-0.5 px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 text-[9px] font-black uppercase">
+                  <span className="ml-0.5 px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 text-[9px] font-black uppercase">
                     -44%
                   </span>
                 )}
@@ -121,9 +121,9 @@ export function FreemiumWall({ usedCount, onUpgrade, onClose }: FreemiumWallProp
             {/* Free */}
             <div className="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-4 border border-slate-200 dark:border-slate-700">
               <p className="text-[11px] font-black text-slate-400 dark:text-slate-500 uppercase mb-2.5">Plan Free</p>
-              <ul className="space-y-1.5 text-xs text-slate-500 dark:text-slate-400">
+              <ul className="space-y-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
                 <li className="flex items-center gap-1.5"><Check size={12} className="text-emerald-500 shrink-0" />{FREE_QUOTA_LIMIT} docs / mes</li>
-                <li className="flex items-center gap-1.5"><Check size={12} className="text-emerald-500 shrink-0" />PDF con marca de agua</li>
+                <li className="flex items-center gap-1.5"><Check size={12} className="text-emerald-500 shrink-0" />PDF marca de agua</li>
                 <li className="flex items-center gap-1.5"><Check size={12} className="text-emerald-500 shrink-0" />WhatsApp básico</li>
                 <li className="flex items-center gap-1.5 opacity-50"><X size={12} className="text-red-400 shrink-0" />Sin nube</li>
                 <li className="flex items-center gap-1.5 opacity-50"><X size={12} className="text-red-400 shrink-0" />Sin firma digital</li>
@@ -131,17 +131,17 @@ export function FreemiumWall({ usedCount, onUpgrade, onClose }: FreemiumWallProp
             </div>
 
             {/* Pro */}
-            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-950/60 dark:to-purple-950/60 rounded-2xl p-4 border-2 border-indigo-300 dark:border-indigo-600 relative">
-              <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-[9px] font-black px-2.5 py-0.5 rounded-full whitespace-nowrap">
+            <div className="bg-gradient-to-br from-emerald-50/90 to-teal-50/90 dark:from-emerald-950/70 dark:to-teal-950/70 rounded-2xl p-4 border-2 border-emerald-500 dark:border-emerald-500 relative shadow-xs">
+              <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-[9px] font-black px-2.5 py-0.5 rounded-full whitespace-nowrap shadow-xs">
                 ⭐ PRO
               </div>
-              <p className="text-[11px] font-black text-indigo-600 dark:text-indigo-400 uppercase mb-2.5">Plan Pro</p>
-              <ul className="space-y-1.5 text-xs text-indigo-700 dark:text-indigo-300">
-                <li className="flex items-center gap-1.5"><Infinity size={12} className="shrink-0" />Docs ilimitados</li>
-                <li className="flex items-center gap-1.5"><Shield size={12} className="shrink-0" />Sin marca de agua</li>
-                <li className="flex items-center gap-1.5"><Check size={12} className="shrink-0" />PDF premium</li>
-                <li className="flex items-center gap-1.5"><Check size={12} className="shrink-0" />Nube + historial</li>
-                <li className="flex items-center gap-1.5"><Check size={12} className="shrink-0" />Soporte prioritario</li>
+              <p className="text-[11px] font-black text-emerald-800 dark:text-emerald-300 uppercase mb-2.5">Plan Pro</p>
+              <ul className="space-y-1.5 text-xs text-emerald-900 dark:text-emerald-100 font-bold">
+                <li className="flex items-center gap-1.5"><Infinity size={12} className="text-emerald-600 dark:text-emerald-400 shrink-0" />Docs ilimitados</li>
+                <li className="flex items-center gap-1.5"><Shield size={12} className="text-emerald-600 dark:text-emerald-400 shrink-0" />Sin marca de agua</li>
+                <li className="flex items-center gap-1.5"><Check size={12} className="text-emerald-600 dark:text-emerald-400 shrink-0" />PDF premium</li>
+                <li className="flex items-center gap-1.5"><Check size={12} className="text-emerald-600 dark:text-emerald-400 shrink-0" />Nube + historial</li>
+                <li className="flex items-center gap-1.5"><Check size={12} className="text-emerald-600 dark:text-emerald-400 shrink-0" />Soporte prioritario</li>
               </ul>
             </div>
           </div>
@@ -149,9 +149,9 @@ export function FreemiumWall({ usedCount, onUpgrade, onClose }: FreemiumWallProp
           {/* CTA Principal */}
           <button
             onClick={handleUpgrade}
-            className="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500 text-white font-black py-4 rounded-2xl shadow-lg shadow-indigo-500/30 active:scale-[0.98] transition-all text-sm flex items-center justify-center gap-2"
+            className="w-full bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-600 hover:from-emerald-700 hover:to-teal-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-emerald-600/30 active:scale-[0.98] transition-all text-sm flex items-center justify-center gap-2 cursor-pointer"
           >
-            <Zap size={16} className="text-yellow-300" />
+            <Zap size={16} className="text-amber-300 fill-amber-300" />
             ¡Actualizar a Pro — {selected.price}{selected.period}!
           </button>
 
