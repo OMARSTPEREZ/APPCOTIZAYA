@@ -4,7 +4,8 @@
 > Aplicación móvil PWA para freelancers y emprendedores latinoamericanos
 
 [![MIT License](https://img.shields.io/badge/License-MIT-6366f1?style=for-the-badge)](LICENSE)
-[![PWA Ready](https://img.shields.io/badge/PWA-Ready-purple?style=for-the-badge&logo=pwa)](https://omarstperez.github.io/APPCOTIZAYA/)
+[![Production Live](https://img.shields.io/badge/Production-Live-00C7B7?style=for-the-badge&logo=vercel)](https://appcotizaya.vercel.app)
+[![PWA Ready](https://img.shields.io/badge/PWA-Ready-purple?style=for-the-badge&logo=pwa)](https://appcotizaya.vercel.app)
 [![React](https://img.shields.io/badge/React_19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
 [![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
