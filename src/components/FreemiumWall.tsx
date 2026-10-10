@@ -4,7 +4,7 @@ import { Zap, X, Check, Star, Crown, Sparkles, Shield, Infinity } from 'lucide-r
 
 interface FreemiumWallProps {
   usedCount: number;
-  onUpgrade?: (plan: 'monthly' | 'annual') => void;
+  onUpgrade?: (plan: 'monthly' | 'annual', method?: 'all' | 'nequi' | 'daviplata' | 'pse' | 'card') => void;
   onClose?: () => void;
   onSyncProStatus?: () => void;
 }
@@ -19,8 +19,8 @@ export function FreemiumWall({ usedCount, onUpgrade, onClose, onSyncProStatus }:
 
   const selected = plans[billingCycle];
 
-  const handleUpgrade = () => {
-    if (onUpgrade) onUpgrade(billingCycle);
+  const handleUpgrade = (method: 'all' | 'nequi' | 'daviplata' | 'pse' | 'card' = 'all') => {
+    if (onUpgrade) onUpgrade(billingCycle, method);
   };
 
   const isLimitReached = usedCount >= FREE_QUOTA_LIMIT;
@@ -149,7 +149,7 @@ export function FreemiumWall({ usedCount, onUpgrade, onClose, onSyncProStatus }:
 
           {/* CTA Principal */}
           <button
-            onClick={handleUpgrade}
+            onClick={() => handleUpgrade('all')}
             className="w-full bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-600 hover:from-emerald-700 hover:to-teal-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-emerald-600/30 active:scale-[0.98] transition-all text-sm flex items-center justify-center gap-2 cursor-pointer"
           >
             <Zap size={16} className="text-amber-300 fill-amber-300" />
@@ -159,25 +159,50 @@ export function FreemiumWall({ usedCount, onUpgrade, onClose, onSyncProStatus }:
           {/* Métodos de Pago Locales de Colombia */}
           <div className="space-y-2 pt-1 border-t border-slate-100 dark:border-slate-800">
             <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 text-center">
-              🇨🇴 Métodos de pago automáticos habilitados
+              🇨🇴 Selecciona tu método de pago directo:
             </p>
 
             <div className="flex flex-wrap items-center justify-center gap-1.5 py-1">
-              <span className="px-2.5 py-1 rounded-xl bg-purple-100 dark:bg-purple-950/80 text-purple-900 dark:text-purple-300 text-[11px] font-black border border-purple-200/80 dark:border-purple-800/60 shadow-xs flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => handleUpgrade('nequi')}
+                className="px-3 py-1.5 rounded-xl bg-purple-100 hover:bg-purple-200 dark:bg-purple-950/80 dark:hover:bg-purple-900 text-purple-900 dark:text-purple-300 text-[11px] font-black border border-purple-200 dark:border-purple-800 shadow-xs flex items-center gap-1 cursor-pointer transition active:scale-95"
+                title="Pagar con Nequi directo"
+              >
                 🟣 Nequi
-              </span>
-              <span className="px-2.5 py-1 rounded-xl bg-red-100 dark:bg-red-950/80 text-red-900 dark:text-red-300 text-[11px] font-black border border-red-200/80 dark:border-red-800/60 shadow-xs flex items-center gap-1">
+              </button>
+              <button
+                type="button"
+                onClick={() => handleUpgrade('daviplata')}
+                className="px-3 py-1.5 rounded-xl bg-red-100 hover:bg-red-200 dark:bg-red-950/80 dark:hover:bg-red-900 text-red-900 dark:text-red-300 text-[11px] font-black border border-red-200 dark:border-red-800 shadow-xs flex items-center gap-1 cursor-pointer transition active:scale-95"
+                title="Pagar con Daviplata directo"
+              >
                 🔴 Daviplata
-              </span>
-              <span className="px-2.5 py-1 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-blue-900 dark:text-blue-300 text-[11px] font-black border border-blue-200/80 dark:border-blue-800/60 shadow-xs flex items-center gap-1">
+              </button>
+              <button
+                type="button"
+                onClick={() => handleUpgrade('pse')}
+                className="px-3 py-1.5 rounded-xl bg-blue-100 hover:bg-blue-200 dark:bg-blue-950/80 dark:hover:bg-blue-900 text-blue-900 dark:text-blue-300 text-[11px] font-black border border-blue-200 dark:border-blue-800 shadow-xs flex items-center gap-1 cursor-pointer transition active:scale-95"
+                title="Pagar por PSE"
+              >
                 🔵 PSE
-              </span>
-              <span className="px-2.5 py-1 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-900 dark:text-emerald-300 text-[11px] font-black border border-emerald-200/80 dark:border-emerald-800/60 shadow-xs flex items-center gap-1">
+              </button>
+              <button
+                type="button"
+                onClick={() => handleUpgrade('pse')}
+                className="px-3 py-1.5 rounded-xl bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/80 dark:hover:bg-emerald-900 text-emerald-900 dark:text-emerald-300 text-[11px] font-black border border-emerald-200 dark:border-emerald-800 shadow-xs flex items-center gap-1 cursor-pointer transition active:scale-95"
+                title="Pagar con Bre-B / Transfiya"
+              >
                 ⚡ Bre-B
-              </span>
-              <span className="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-bold border border-slate-200 dark:border-slate-700">
+              </button>
+              <button
+                type="button"
+                onClick={() => handleUpgrade('card')}
+                className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-[11px] font-bold border border-slate-200 dark:border-slate-700 shadow-xs cursor-pointer transition active:scale-95"
+                title="Pagar con Tarjeta de Crédito o Débito"
+              >
                 💳 Tarjetas
-              </span>
+              </button>
             </div>
 
             <div className="flex flex-col items-center gap-1.5 pt-2">
