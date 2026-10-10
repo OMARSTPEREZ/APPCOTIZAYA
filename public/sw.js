@@ -1,7 +1,7 @@
 // Service Worker para CotizaRápido PWA
 // Estrategia: Network-First (siempre obtiene la versión más reciente en vivo si hay internet, con fallback offline)
 
-const CACHE_NAME = 'cotizarapido-v3';
+const CACHE_NAME = 'cotizarapido-v4';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

@@ -1,6 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
-import { FileText, Building2, History, Sparkles, LogOut, User as UserIcon, LogIn } from 'lucide-react';
+import { 
+  FileText, 
+  Building2, 
+  History, 
+  Sparkles, 
+  LogOut, 
+  LogIn, 
+  Sun, 
+  Moon, 
+  ChevronDown,
+  ShieldCheck
+} from 'lucide-react';
 
 interface HeaderProps {
   activeTab: 'editor' | 'preview' | 'business' | 'history';
@@ -9,6 +20,8 @@ interface HeaderProps {
   user: SupabaseUser | null;
   onOpenAuthModal: () => void;
   onSignOut: () => void;
+  isDarkMode: boolean;
+  onToggleDarkMode: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -18,14 +31,41 @@ export const Header: React.FC<HeaderProps> = ({
   user,
   onOpenAuthModal,
   onSignOut,
+  isDarkMode,
+  onToggleDarkMode,
 }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'Mi Cuenta';
+  // Close dropdown on outside click or Escape key
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowUserMenu(false);
+      }
+    };
+
+    if (showUserMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [showUserMenu]);
+
+  const userName = user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'Mi Perfil';
+  const userEmail = user?.email || 'Sin correo asociado';
   const userAvatar = user?.user_metadata?.avatar_url || user?.user_metadata?.picture;
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs no-print">
+    <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-xs no-print transition-colors duration-200">
       <div className="max-w-6xl mx-auto px-3 sm:px-6">
         <div className="flex items-center justify-between h-16 gap-2">
           {/* Brand */}
@@ -38,27 +78,27 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-base sm:text-lg text-slate-900 tracking-tight">
-                  Cotiza<span className="text-emerald-600">Rápido</span>
+                <span className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white tracking-tight">
+                  Cotiza<span className="text-emerald-600 dark:text-emerald-400">Rápido</span>
                 </span>
-                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">
                   Free $0
                 </span>
               </div>
-              <p className="text-[10px] sm:text-[11px] text-slate-500 font-medium hidden sm:block">
+              <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium hidden sm:block">
                 Cotizaciones y Cuentas de Cobro en PDF
               </p>
             </div>
           </div>
 
           {/* Navigation Tabs Desktop */}
-          <nav className="hidden md:flex items-center gap-1 bg-slate-100/90 p-1 rounded-2xl border border-slate-200/60">
+          <nav className="hidden md:flex items-center gap-1 bg-slate-100/90 dark:bg-slate-800/90 p-1 rounded-2xl border border-slate-200/60 dark:border-slate-700">
             <button
               onClick={() => setActiveTab('editor')}
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
                 activeTab === 'editor'
-                  ? 'bg-white text-emerald-700 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <FileText size={15} />
@@ -68,8 +108,8 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveTab('preview')}
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
                 activeTab === 'preview'
-                  ? 'bg-white text-emerald-700 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <span>👁️</span> Vista Previa & PDF
@@ -78,8 +118,8 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveTab('business')}
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
                 activeTab === 'business'
-                  ? 'bg-white text-emerald-700 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <Building2 size={15} />
@@ -89,8 +129,8 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setActiveTab('history')}
               className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
                 activeTab === 'history'
-                  ? 'bg-white text-emerald-700 shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
+                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <History size={15} />
@@ -98,78 +138,197 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
           </nav>
 
-          {/* Right Actions: User Profile or Sign In */}
+          {/* Right Header Area: Authenticated User Dropdown or Guest / Sign In */}
           <div className="flex items-center gap-2">
+            {/* Quick Dark Mode button for Guest/Offline users */}
+            {!user && (
+              <button
+                type="button"
+                onClick={onToggleDarkMode}
+                title={isDarkMode ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
+                className="p-2 rounded-xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              >
+                {isDarkMode ? <Sun size={17} className="text-amber-400" /> : <Moon size={17} />}
+              </button>
+            )}
+
             {user ? (
-              <div className="relative">
+              /* MENÚ DE USUARIO REGISTRADO */
+              <div className="relative" ref={dropdownRef}>
                 <button
                   type="button"
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className="flex items-center gap-2 p-1 sm:px-2.5 sm:py-1 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 transition text-left"
+                  aria-expanded={showUserMenu}
+                  aria-label="Menú de perfil"
+                  className="flex items-center gap-2 p-1.5 sm:px-3 sm:py-1.5 rounded-2xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700/80 border border-slate-200/80 dark:border-slate-700 transition text-left cursor-pointer select-none"
                 >
                   {userAvatar ? (
                     <img
                       src={userAvatar}
                       alt={userName}
-                      className="w-7 h-7 rounded-full object-cover border border-emerald-500 shadow-xs"
+                      className="w-8 h-8 rounded-full object-cover border-2 border-emerald-500 shadow-xs shrink-0"
                     />
                   ) : (
-                    <div className="w-7 h-7 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-linear-to-tr from-emerald-600 to-teal-500 text-white font-extrabold text-xs flex items-center justify-center shadow-xs shrink-0">
                       {userName.charAt(0).toUpperCase()}
                     </div>
                   )}
+                  
                   <div className="hidden sm:block">
-                    <p className="text-xs font-bold text-slate-800 truncate max-w-[120px] leading-tight">
+                    <p className="text-xs font-extrabold text-slate-900 dark:text-white truncate max-w-[130px] leading-tight">
                       {userName}
                     </p>
-                    <p className="text-[10px] text-emerald-600 font-semibold leading-tight">
-                      Sincronizado
-                    </p>
+                    <div className="flex items-center gap-1 leading-tight">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold truncate max-w-[110px]">
+                        Conectado
+                      </span>
+                    </div>
                   </div>
+
+                  <ChevronDown 
+                    size={15} 
+                    className={`text-slate-400 transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`} 
+                  />
                 </button>
 
-                {/* Dropdown Menu */}
+                {/* DROPDOWN MENU */}
                 {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                    <div className="px-3 py-2 border-b border-slate-100">
-                      <p className="text-xs font-bold text-slate-900 truncate">{userName}</p>
-                      <p className="text-[11px] text-slate-400 truncate">{user.email}</p>
+                  <div className="absolute right-0 mt-2 w-72 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 py-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                    {/* 1. Información del Perfil */}
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-800">
+                      <div className="flex items-center gap-3 mb-2">
+                        {userAvatar ? (
+                          <img
+                            src={userAvatar}
+                            alt={userName}
+                            className="w-10 h-10 rounded-full object-cover border-2 border-emerald-500 shadow-xs"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-linear-to-tr from-emerald-600 to-teal-500 text-white font-black text-sm flex items-center justify-center shadow-xs">
+                            {userName.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="overflow-hidden">
+                          <p className="text-xs font-black text-slate-900 dark:text-white truncate leading-tight">
+                            {userName}
+                          </p>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate leading-tight mt-0.5">
+                            {userEmail}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-900/60 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold">
+                        <ShieldCheck size={12} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <span className="truncate">Cuenta protegida y respaldada</span>
+                      </div>
                     </div>
-                    <button
-                      onClick={() => {
-                        setShowUserMenu(false);
-                        setActiveTab('business');
-                      }}
-                      className="w-full px-3 py-2 text-left text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center gap-2"
-                    >
-                      <Building2 size={14} className="text-slate-500" />
-                      Perfil de Negocio
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowUserMenu(false);
-                        onSignOut();
-                      }}
-                      className="w-full px-3 py-2 text-left text-xs font-semibold text-red-600 hover:bg-red-50 flex items-center gap-2"
-                    >
-                      <LogOut size={14} />
-                      Cerrar Sesión
-                    </button>
+
+                    {/* Accesos rápidos */}
+                    <div className="py-1">
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          setActiveTab('business');
+                        }}
+                        className="w-full px-4 py-2.5 text-left text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/70 flex items-center gap-2.5 transition"
+                      >
+                        <Building2 size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <div className="flex-1">
+                          <p className="leading-tight">Mi Negocio & Facturación</p>
+                          <p className="text-[10px] text-slate-400 font-normal">Logo, NIT, moneda y bancos</p>
+                        </div>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          setActiveTab('history');
+                        }}
+                        className="w-full px-4 py-2.5 text-left text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/70 flex items-center gap-2.5 transition"
+                      >
+                        <History size={16} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <div className="flex-1">
+                          <p className="leading-tight">Mis Cotizaciones en la Nube</p>
+                          <p className="text-[10px] text-slate-400 font-normal">Historial sincronizado</p>
+                        </div>
+                      </button>
+                    </div>
+
+                    {/* 2. Cambiar Apariencia (Modo Oscuro / Claro Switch) */}
+                    <div className="border-t border-slate-100 dark:border-slate-800 px-4 py-2.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2.5">
+                          {isDarkMode ? (
+                            <Moon size={16} className="text-indigo-400 shrink-0" />
+                          ) : (
+                            <Sun size={16} className="text-amber-500 shrink-0" />
+                          )}
+                          <div>
+                            <p className="text-xs font-bold text-slate-800 dark:text-slate-200 leading-tight">
+                              Modo Oscuro
+                            </p>
+                            <p className="text-[10px] text-slate-400">
+                              {isDarkMode ? 'Tema nocturno activo' : 'Tema claro activo'}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Interactive Toggle Switch */}
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={isDarkMode}
+                          onClick={onToggleDarkMode}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                            isDarkMode ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-700'
+                          }`}
+                        >
+                          <span
+                            aria-hidden="true"
+                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                              isDarkMode ? 'translate-x-5' : 'translate-x-0'
+                            }`}
+                          />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* 3. Cerrar Sesión (Sign Out) */}
+                    <div className="border-t border-slate-100 dark:border-slate-800 pt-1">
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          onSignOut();
+                        }}
+                        className="w-full px-4 py-2.5 text-left text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 flex items-center gap-2.5 transition"
+                      >
+                        <LogOut size={16} className="shrink-0" />
+                        <div className="flex-1">
+                          <p className="leading-tight">Cerrar Sesión</p>
+                          <p className="text-[10px] text-red-500/80 font-normal">
+                            Regresar a modo offline/invitado
+                          </p>
+                        </div>
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
             ) : (
+              /* ESTADO INVITADO / OFFLINE (Boton Ingresar visible) */
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded-lg hidden sm:inline">
+                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg hidden sm:inline">
                   Modo Offline
                 </span>
                 <button
                   type="button"
                   onClick={onOpenAuthModal}
-                  className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-[11px] sm:text-xs shadow-xs transition active:scale-95"
+                  className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-extrabold text-[11px] sm:text-xs shadow-xs transition active:scale-95"
                 >
                   <LogIn size={13} />
-                  <span>Iniciar Sesión</span>
+                  <span>Ingresar</span>
                 </button>
               </div>
             )}
@@ -177,53 +336,52 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Mobile Tab Bar */}
-      <div className="md:hidden flex items-center justify-around border-t border-slate-100 px-2 py-1.5 bg-white">
+      {/* Mobile Tab Bar: ONLY 4 core tabs (No Google tab, No Cuenta tab) */}
+      <div className="md:hidden flex items-center justify-around border-t border-slate-100 dark:border-slate-800 px-2 py-1.5 bg-white dark:bg-slate-900 transition-colors duration-200">
         <button
           onClick={() => setActiveTab('editor')}
-          className={`flex flex-col items-center gap-1 py-1 px-2 text-[10px] font-bold rounded-lg ${
-            activeTab === 'editor' ? 'text-emerald-700' : 'text-slate-500'
+          className={`flex flex-col items-center gap-1 py-1 px-3 text-[10px] font-bold rounded-lg transition-colors ${
+            activeTab === 'editor' 
+              ? 'text-emerald-700 dark:text-emerald-400' 
+              : 'text-slate-500 dark:text-slate-400'
           }`}
         >
-          <FileText size={16} />
+          <FileText size={17} />
           <span>Editor</span>
         </button>
         <button
           onClick={() => setActiveTab('preview')}
-          className={`flex flex-col items-center gap-1 py-1 px-2 text-[10px] font-bold rounded-lg ${
-            activeTab === 'preview' ? 'text-emerald-700' : 'text-slate-500'
+          className={`flex flex-col items-center gap-1 py-1 px-3 text-[10px] font-bold rounded-lg transition-colors ${
+            activeTab === 'preview' 
+              ? 'text-emerald-700 dark:text-emerald-400' 
+              : 'text-slate-500 dark:text-slate-400'
           }`}
         >
-          <span className="text-sm leading-none">👁️</span>
+          <span className="text-base leading-none">👁️</span>
           <span>PDF</span>
         </button>
         <button
           onClick={() => setActiveTab('business')}
-          className={`flex flex-col items-center gap-1 py-1 px-2 text-[10px] font-bold rounded-lg ${
-            activeTab === 'business' ? 'text-emerald-700' : 'text-slate-500'
+          className={`flex flex-col items-center gap-1 py-1 px-3 text-[10px] font-bold rounded-lg transition-colors ${
+            activeTab === 'business' 
+              ? 'text-emerald-700 dark:text-emerald-400' 
+              : 'text-slate-500 dark:text-slate-400'
           }`}
         >
-          <Building2 size={16} />
+          <Building2 size={17} />
           <span>Negocio</span>
         </button>
         <button
           onClick={() => setActiveTab('history')}
-          className={`flex flex-col items-center gap-1 py-1 px-2 text-[10px] font-bold rounded-lg ${
-            activeTab === 'history' ? 'text-emerald-700' : 'text-slate-500'
+          className={`flex flex-col items-center gap-1 py-1 px-3 text-[10px] font-bold rounded-lg transition-colors ${
+            activeTab === 'history' 
+              ? 'text-emerald-700 dark:text-emerald-400' 
+              : 'text-slate-500 dark:text-slate-400'
           }`}
         >
-          <History size={16} />
+          <History size={17} />
           <span>Historial</span>
         </button>
-        {!user && (
-          <button
-            onClick={onOpenAuthModal}
-            className="flex flex-col items-center gap-1 py-1 px-2 text-[10px] font-bold rounded-lg text-slate-800"
-          >
-            <UserIcon size={16} />
-            <span>Cuenta</span>
-          </button>
-        )}
       </div>
     </header>
   );

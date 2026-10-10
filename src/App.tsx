@@ -96,6 +96,21 @@ export function App() {
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
   const [showFreemiumWall, setShowFreemiumWall] = useState(false);
   const [validationErrors, setValidationErrors] = useState<QuoteValidationErrors>({});
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    const saved = localStorage.getItem('cotizarapido_theme');
+    if (saved) return saved === 'dark';
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('cotizarapido_theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('cotizarapido_theme', 'light');
+    }
+  }, [isDarkMode]);
 
   const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
     setToastMessage(msg);
@@ -373,7 +388,7 @@ export function App() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -381,6 +396,8 @@ export function App() {
         user={user}
         onOpenAuthModal={() => setShowAuthModal(true)}
         onSignOut={handleSignOut}
+        isDarkMode={isDarkMode}
+        onToggleDarkMode={() => setIsDarkMode(prev => !prev)}
       />
 
       {/* Toast Notification */}
@@ -480,7 +497,7 @@ export function App() {
       </main>
 
       {/* Footer */}
-      <footer className="no-print py-4 border-t border-slate-200/80 bg-white text-center text-xs text-slate-400">
+      <footer className="no-print py-4 border-t border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 text-center text-xs text-slate-400 dark:text-slate-500 transition-colors duration-200">
         <p className="font-medium">
           CotizaRápido • {user ? `Conectado como ${user.email}` : 'Modo Offline (100% Funcional)'} •{' '}
           {profile.subscription_tier === 'pro' ? '⭐ Plan Pro' : `Free: ${profile.monthly_quote_count || 0}/5 docs este mes`}

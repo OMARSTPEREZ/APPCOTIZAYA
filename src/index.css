@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -10,13 +12,73 @@
     background-color: #f8fafc;
     color: #0f172a;
     -webkit-font-smoothing: antialiased;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  html.dark body {
+    background-color: #0b0f19;
+    color: #f8fafc;
+  }
+
+  /* Universal Dark Mode styling for cards, panels, borders and text */
+  html.dark .bg-white {
+    background-color: #111827;
+  }
+  html.dark .bg-slate-50 {
+    background-color: #0b0f19;
+  }
+  html.dark .bg-slate-100 {
+    background-color: #1f2937;
+  }
+  html.dark .bg-slate-100\/90 {
+    background-color: rgba(31, 41, 55, 0.9);
+  }
+  html.dark .border-slate-100,
+  html.dark .border-slate-200,
+  html.dark .border-slate-200\/80,
+  html.dark .border-slate-200\/60,
+  html.dark .border-slate-300 {
+    border-color: #1f2937;
+  }
+  html.dark .text-slate-900,
+  html.dark .text-slate-800 {
+    color: #f3f4f6;
+  }
+  html.dark .text-slate-700 {
+    color: #e5e7eb;
+  }
+  html.dark .text-slate-600 {
+    color: #cbd5e1;
+  }
+  html.dark .text-slate-500 {
+    color: #94a3b8;
+  }
+  html.dark .text-slate-400 {
+    color: #64748b;
+  }
+
+  html.dark input,
+  html.dark textarea,
+  html.dark select {
+    background-color: #1f2937;
+    color: #f3f4f6;
+    border-color: #374151;
+  }
+  html.dark input::placeholder,
+  html.dark textarea::placeholder {
+    color: #64748b;
   }
 }
 
 /* Print Specific Styles */
 @media print {
-  body {
+  body, html.dark body {
     background: #ffffff !important;
+    color: #000000 !important;
   }
   .no-print {
     display: none !important;
