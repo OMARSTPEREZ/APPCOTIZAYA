@@ -71,6 +71,24 @@ export const signUpWithEmail = async (email: string, password: string) => {
   return data;
 };
 
+export const signInWithGoogle = async () => {
+  const client = getSupabase();
+  if (!client) throw new Error('Supabase no está configurado. Ve a Configuración de Nube.');
+  const redirectTo = window.location.origin;
+  const { data, error } = await client.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo,
+      queryParams: {
+        access_type: 'offline',
+        prompt: 'consent',
+      },
+    },
+  });
+  if (error) throw error;
+  return data;
+};
+
 export const signOut = async () => {
   const client = getSupabase();
   if (!client) return;

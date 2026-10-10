@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { Header } from './components/Header';
 import { BusinessProfileModal } from './components/BusinessProfileModal';
 import { DocumentEditor } from './components/DocumentEditor';
@@ -8,6 +9,7 @@ import { SupabaseConfigModal } from './components/SupabaseConfigModal';
 import { EmptyState } from './components/EmptyState';
 import { FreemiumWall } from './components/FreemiumWall';
 import { PublicView } from './components/PublicView';
+import { AuthModal } from './components/AuthModal';
 import type { BusinessProfile, QuoteDocument, QuoteValidationErrors } from './types';
 import { validateQuote, canGenerateDocument } from './types';
 import {
@@ -19,7 +21,15 @@ import {
   saveToHistory,
   deleteFromHistory
 } from './services/storageService';
-import { getSupabase, saveProfileToSupabase, saveQuoteToSupabase } from './services/supabase';
+import { 
+  getSupabase, 
+  saveProfileToSupabase, 
+  saveQuoteToSupabase,
+  signInWithGoogle,
+  signOut,
+  getCurrentUser,
+  fetchProfileFromSupabase
+} from './services/supabase';
 import confetti from 'canvas-confetti';
 
 const createInitialQuote = (profile: BusinessProfile, nextNumber: number = 1): QuoteDocument => {
@@ -73,7 +83,10 @@ export function App() {
     if (savedDraft) return savedDraft;
     return createInitialQuote(loadProfile(), (loadHistory().length || 0) + 1);
   });
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const [isCloudConnected, setIsCloudConnected] = useState<boolean>(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
   const [showFreemiumWall, setShowFreemiumWall] = useState(false);
@@ -85,19 +98,51 @@ export function App() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Verificar conexión Supabase al iniciar
+  // Verificar conexión Supabase y usuario autenticado
   useEffect(() => {
-    const checkSupabase = async () => {
-      const client = getSupabase();
-      if (!client) return;
-      try {
-        const { error } = await client.from('profiles').select('id').limit(1);
-        setIsCloudConnected(!error || error.code === 'PGRST116');
-      } catch {
-        setIsCloudConnected(false);
+    const client = getSupabase();
+    if (!client) return;
+
+    // 1. Verificar estado de autenticación inicial
+    getCurrentUser().then(async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        setIsCloudConnected(true);
+        const remote = await fetchProfileFromSupabase();
+        if (remote) {
+          setProfile(remote);
+          saveProfile(remote);
+        } else {
+          saveProfileToSupabase(profile, currentUser.id);
+        }
       }
+    });
+
+    // 2. Suscribirse a eventos de autenticación en tiempo real
+    const { data: authListener } = client.auth.onAuthStateChange(async (event, session) => {
+      const currentUser = session?.user || null;
+      setUser(currentUser);
+      if (currentUser) {
+        setIsCloudConnected(true);
+        const remote = await fetchProfileFromSupabase();
+        if (remote) {
+          setProfile(remote);
+          saveProfile(remote);
+        } else {
+          saveProfileToSupabase(profile, currentUser.id);
+        }
+        if (event === 'SIGNED_IN') {
+          showToast(`👋 ¡Bienvenido, ${currentUser.user_metadata?.full_name || 'Usuario'}!`);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setIsCloudConnected(false);
+        showToast('Sesión cerrada. Modo Invitado activo.');
+      }
+    });
+
+    return () => {
+      authListener?.subscription.unsubscribe();
     };
-    checkSupabase();
   }, []);
 
   // Registrar Service Worker para PWA
@@ -109,13 +154,38 @@ export function App() {
     }
   }, []);
 
-  // ── Handlers ──────────────────────────────────────────────────────────────
+  // ── Handlers de Autenticación ─────────────────────────────────────────────
+
+  const handleSignInWithGoogle = async () => {
+    setIsAuthLoading(true);
+    try {
+      await signInWithGoogle();
+      setShowAuthModal(false);
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Error al conectar con Google';
+      console.warn('Google Auth notice:', errorMsg);
+      showToast(`⚠️ ${errorMsg}`, 'error');
+      setShowAuthModal(false);
+      setActiveTab('cloud');
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await signOut();
+    setUser(null);
+    setIsCloudConnected(false);
+    showToast('Sesión cerrada. Continuando en Modo Invitado.');
+  };
+
+  // ── Handlers de Documentos ────────────────────────────────────────────────
 
   const handleSaveProfile = (newProfile: BusinessProfile) => {
     setProfile(newProfile);
     saveProfile(newProfile);
-    if (isCloudConnected) {
-      saveProfileToSupabase(newProfile);
+    if (isCloudConnected && user) {
+      saveProfileToSupabase(newProfile, user.id);
     }
     showToast('✅ Configuración de negocio guardada');
   };
@@ -240,6 +310,9 @@ export function App() {
         setActiveTab={setActiveTab}
         isCloudConnected={isCloudConnected}
         itemCount={quote.items.length}
+        user={user}
+        onOpenAuthModal={() => setShowAuthModal(true)}
+        onSignOut={handleSignOut}
       />
 
       {/* Toast Notification */}
@@ -255,13 +328,20 @@ export function App() {
         </div>
       )}
 
+      {/* Modal de Autenticación con Google / Modo Invitado */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSignInWithGoogle={handleSignInWithGoogle}
+        isConnecting={isAuthLoading}
+      />
+
       {/* Muro de pago Freemium */}
       {showFreemiumWall && (
         <FreemiumWall
           usedCount={profile.monthly_quote_count || 0}
           onUpgrade={() => {
             setShowFreemiumWall(false);
-            // Aquí irá el link de pago (Stripe, Gumroad, etc.)
             window.open('https://github.com/OMARSTPEREZ/APPCOTIZAYA#upgrade', '_blank');
           }}
           onClose={() => setShowFreemiumWall(false)}
@@ -333,7 +413,7 @@ export function App() {
       {/* Footer */}
       <footer className="no-print py-4 border-t border-slate-200/80 bg-white text-center text-xs text-slate-400">
         <p className="font-medium">
-          CotizaRápido • Costo de servidor: $0 •{' '}
+          CotizaRápido • {user ? `Conectado como ${user.email}` : 'Modo Invitado (Offline)'} •{' '}
           {profile.subscription_tier === 'pro' ? '⭐ Plan Pro' : `Free: ${profile.monthly_quote_count || 0}/5 docs este mes`}
         </p>
       </footer>
