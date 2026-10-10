@@ -103,6 +103,19 @@ export function App() {
     const client = getSupabase();
     if (!client) return;
 
+    // 0. Probar conexión activa inmediata con Supabase
+    const pingSupabase = async () => {
+      try {
+        const { error } = await client.from('profiles').select('id').limit(1);
+        if (!error || error.code === 'PGRST116') {
+          setIsCloudConnected(true);
+        }
+      } catch {
+        // Ignorar si no responde
+      }
+    };
+    pingSupabase();
+
     // 1. Verificar estado de autenticación inicial
     getCurrentUser().then(async (currentUser) => {
       setUser(currentUser);
