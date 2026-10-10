@@ -21,6 +21,7 @@ interface DocumentPreviewProps {
   onBackToEdit: () => void;
   onSaveToHistory: () => void;
   onConvertToInvoice?: (quote: QuoteDocument) => void;
+  isGuestMode?: boolean;
 }
 
 export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
@@ -29,7 +30,10 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
   onBackToEdit,
   onSaveToHistory,
   onConvertToInvoice,
+  isGuestMode = false,
 }) => {
+  const isPro = profile.subscription_tier === 'pro';
+  const showWatermark = isGuestMode || !isPro;
   const [downloading, setDownloading] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
   const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
@@ -350,7 +354,13 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
           <div className="pt-16 mt-8 border-t border-slate-200 flex justify-between items-end text-xs text-slate-400">
             <div>
               <p className="font-bold text-slate-600">{profile.business_name}</p>
-              <p>Generado con CotizaRápido • Documento oficial digital</p>
+              <p>CotizaYa! • Documento oficial digital</p>
+              {/* Marca de agua para plan Free o Invitado */}
+              {showWatermark && (
+                <p className="mt-1 text-[10px] text-slate-400 italic font-medium">
+                  Documento generado con CotizaYa! — www.appcotizaya.vercel.app
+                </p>
+              )}
             </div>
 
             <div className="text-center w-52 space-y-1">

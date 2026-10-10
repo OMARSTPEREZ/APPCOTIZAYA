@@ -24,57 +24,133 @@
     color: #f8fafc;
   }
 
-  /* Universal Dark Mode styling for cards, panels, borders and text */
+  /* ─── Universal Dark Mode: backgrounds ─────────────────────────── */
   html.dark .bg-white {
-    background-color: #111827;
+    background-color: #111827 !important;
   }
   html.dark .bg-slate-50 {
-    background-color: #0b0f19;
+    background-color: #0d1117 !important;
+  }
+  html.dark .bg-slate-50\/70 {
+    background-color: rgba(13, 17, 23, 0.7) !important;
   }
   html.dark .bg-slate-100 {
-    background-color: #1f2937;
+    background-color: #1f2937 !important;
   }
   html.dark .bg-slate-100\/90 {
-    background-color: rgba(31, 41, 55, 0.9);
+    background-color: rgba(31, 41, 55, 0.9) !important;
   }
+  html.dark .bg-slate-200 {
+    background-color: #374151 !important;
+  }
+
+  /* ─── Universal Dark Mode: borders ─────────────────────────────── */
   html.dark .border-slate-100,
   html.dark .border-slate-200,
   html.dark .border-slate-200\/80,
   html.dark .border-slate-200\/60,
   html.dark .border-slate-300 {
-    border-color: #1f2937;
-  }
-  html.dark .text-slate-900,
-  html.dark .text-slate-800 {
-    color: #f3f4f6;
-  }
-  html.dark .text-slate-700 {
-    color: #e5e7eb;
-  }
-  html.dark .text-slate-600 {
-    color: #cbd5e1;
-  }
-  html.dark .text-slate-500 {
-    color: #94a3b8;
-  }
-  html.dark .text-slate-400 {
-    color: #64748b;
+    border-color: #374151 !important;
   }
 
+  /* ─── Universal Dark Mode: text ─────────────────────────────────── */
+  html.dark .text-slate-900,
+  html.dark .text-slate-800 {
+    color: #f3f4f6 !important;
+  }
+  html.dark .text-slate-700 {
+    color: #e5e7eb !important;
+  }
+  html.dark .text-slate-600 {
+    color: #cbd5e1 !important;
+  }
+  html.dark .text-slate-500 {
+    color: #94a3b8 !important;
+  }
+  html.dark .text-slate-400 {
+    color: #64748b !important;
+  }
+
+  /* ─── Inputs, Textareas, Selects ───────────────────────────────── */
   html.dark input,
   html.dark textarea,
   html.dark select {
-    background-color: #1f2937;
-    color: #f3f4f6;
-    border-color: #374151;
+    background-color: #1f2937 !important;
+    color: #f3f4f6 !important;
+    border-color: #374151 !important;
   }
   html.dark input::placeholder,
   html.dark textarea::placeholder {
-    color: #64748b;
+    color: #64748b !important;
+  }
+  html.dark input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
+
+  /* ─── Segment/Tab buttons (bg-slate-100 panels) ─────────────────── */
+  html.dark .bg-slate-100 button {
+    color: #94a3b8;
+  }
+
+  /* ─── Totales / summary boxes ────────────────────────────────────── */
+  html.dark .bg-slate-50.rounded-xl,
+  html.dark .bg-slate-50.p-4 {
+    background-color: #1a2235 !important;
+    border-color: #374151 !important;
+  }
+
+  /* ─── Gradient overrides ─────────────────────────────────────────── */
+  html.dark .bg-emerald-50 {
+    background-color: rgba(6, 78, 59, 0.25) !important;
+  }
+  html.dark .border-emerald-200 {
+    border-color: rgba(16, 185, 129, 0.35) !important;
+  }
+  html.dark .text-emerald-700 {
+    color: #34d399 !important;
+  }
+  html.dark .text-emerald-600 {
+    color: #10b981 !important;
+  }
+
+  html.dark .bg-blue-50 {
+    background-color: rgba(29, 78, 216, 0.2) !important;
+  }
+  html.dark .border-blue-200 {
+    border-color: rgba(59, 130, 246, 0.35) !important;
+  }
+  html.dark .text-blue-700 {
+    color: #60a5fa !important;
+  }
+
+  html.dark .bg-red-50 {
+    background-color: rgba(127, 29, 29, 0.25) !important;
+  }
+  html.dark .border-red-200 {
+    border-color: rgba(239, 68, 68, 0.35) !important;
+  }
+  html.dark .text-red-600 {
+    color: #f87171 !important;
+  }
+  html.dark .text-red-700 {
+    color: #fca5a5 !important;
+  }
+
+  /* ─── Modal overlays ─────────────────────────────────────────────── */
+  html.dark .bg-white.rounded-3xl,
+  html.dark .bg-white.rounded-2xl {
+    background-color: #111827 !important;
+    border-color: #1f2937 !important;
+  }
+
+  /* ─── Fixed bottom bar (nav) ─────────────────────────────────────── */
+  html.dark nav {
+    background-color: rgba(13, 17, 23, 0.95) !important;
+    border-color: #1f2937 !important;
   }
 }
 
-/* Print Specific Styles */
+/* ─── Print Specific Styles ──────────────────────────────────────────── */
 @media print {
   body, html.dark body {
     background: #ffffff !important;

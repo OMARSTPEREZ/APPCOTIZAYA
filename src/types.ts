@@ -2,7 +2,7 @@ export type DocumentType = 'cotizacion' | 'cuenta_cobro';
 export type DocumentStatus = 'pending' | 'sent' | 'accepted' | 'rejected' | 'converted';
 export type SubscriptionTier = 'free' | 'pro';
 
-export const FREE_QUOTA_LIMIT = 5; // documentos/mes plan Free
+export const FREE_QUOTA_LIMIT = 3; // documentos/mes plan Free
 
 export interface BusinessProfile {
   id?: string;

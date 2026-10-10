@@ -33,6 +33,8 @@ interface DocumentEditorProps {
   onSaveDraft: () => void;
   onNewDocument: () => void;
   onConvertToInvoice?: (quote: QuoteDocument) => void;
+  isGuestMode?: boolean;
+  onOpenAuthModal?: () => void;
 }
 
 const COUNTRY_CODES = [
@@ -59,6 +61,8 @@ export const DocumentEditor: React.FC<DocumentEditorProps> = ({
   onSaveDraft,
   onNewDocument,
   onConvertToInvoice,
+  isGuestMode = false,
+  onOpenAuthModal,
 }) => {
   const currency = profile.currency_symbol || '$';
   const isQuote = quote.document_type === 'cotizacion';
@@ -157,15 +161,38 @@ export const DocumentEditor: React.FC<DocumentEditorProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+
+      {/* Banner Modo Invitado */}
+      {isGuestMode && (
+        <div className="flex items-start sm:items-center gap-3 p-4 rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 text-amber-800 dark:text-amber-300">
+          <span className="text-xl shrink-0">🔓</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold">Modo Invitado: Tus datos solo están en este dispositivo.</p>
+            <p className="text-[11px] mt-0.5 text-amber-700 dark:text-amber-400">
+              Inicia sesión con Google para respaldar tus cotizaciones en la nube y no perderlas.
+            </p>
+          </div>
+          {onOpenAuthModal && (
+            <button
+              type="button"
+              onClick={onOpenAuthModal}
+              className="shrink-0 px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-bold transition whitespace-nowrap"
+            >
+              Iniciar Sesión
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Top Banner / Type Selector */}
-      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-xs space-y-5">
+      <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-              <Sparkles className="text-emerald-600" size={24} />
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+              <Sparkles className="text-emerald-600 dark:text-emerald-400" size={24} />
               Creador de Documentos
             </h1>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
               Completa los datos y obtén en segundos un documento listo para PDF o WhatsApp.
             </p>
           </div>
@@ -213,14 +240,14 @@ export const DocumentEditor: React.FC<DocumentEditorProps> = ({
         </div>
 
         {/* Segmented Document Type Selector */}
-        <div className="bg-slate-100 p-1.5 rounded-2xl flex items-center gap-1 border border-slate-200/80">
+        <div className="bg-slate-100 dark:bg-slate-900/60 p-1.5 rounded-2xl flex items-center gap-1 border border-slate-200/80 dark:border-slate-700">
           <button
             type="button"
             onClick={() => handleDocTypeChange('cotizacion')}
             className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all ${
               quote.document_type === 'cotizacion'
-                ? 'bg-white text-emerald-700 shadow-sm'
-                : 'text-slate-500 hover:text-slate-800'
+                ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-400 shadow-sm'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
             <FileText size={16} />
@@ -231,8 +258,8 @@ export const DocumentEditor: React.FC<DocumentEditorProps> = ({
             onClick={() => handleDocTypeChange('cuenta_cobro')}
             className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-black text-xs sm:text-sm uppercase tracking-wider transition-all ${
               quote.document_type === 'cuenta_cobro'
-                ? 'bg-white text-blue-700 shadow-sm'
-                : 'text-slate-500 hover:text-slate-800'
+                ? 'bg-white dark:bg-slate-700 text-blue-700 dark:text-blue-400 shadow-sm'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
             }`}
           >
             <Receipt size={16} />
@@ -241,14 +268,14 @@ export const DocumentEditor: React.FC<DocumentEditorProps> = ({
         </div>
 
         {/* Selector Dinámico de Moneda y Detección Regional */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-700">
           <div className="flex items-center gap-2">
-            <Globe size={16} className="text-emerald-600" />
-            <span className="text-xs font-bold text-slate-700">Moneda del documento:</span>
+            <Globe size={16} className="text-emerald-600 dark:text-emerald-400" />
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Moneda del documento:</span>
             <select
               value={currency}
               onChange={(e) => onUpdateProfileCurrency(e.target.value)}
-              className="px-2.5 py-1 rounded-lg border border-slate-300 text-xs font-extrabold text-slate-900 bg-white focus:outline-none focus:border-emerald-500"
+              className="px-2.5 py-1 rounded-lg border border-slate-300 dark:border-slate-600 text-xs font-extrabold text-slate-900 dark:text-white bg-white dark:bg-slate-800 focus:outline-none focus:border-emerald-500"
             >
               {SUPPORTED_CURRENCIES.map((c) => (
                 <option key={c.code} value={c.symbol}>
@@ -319,9 +346,9 @@ export const DocumentEditor: React.FC<DocumentEditorProps> = ({
       </div>
 
       {/* Datos del Cliente */}
-      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
-        <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-          <User size={16} className="text-emerald-600" />
+      <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
+        <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+          <User size={16} className="text-emerald-600 dark:text-emerald-400" />
           Datos del Cliente
         </h2>
 
@@ -415,16 +442,16 @@ export const DocumentEditor: React.FC<DocumentEditorProps> = ({
       </div>
 
       {/* Lista Dinámica de Ítems */}
-      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+      <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-            <Receipt size={16} className="text-emerald-600" />
+          <h2 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
+            <Receipt size={16} className="text-emerald-600 dark:text-emerald-400" />
             Conceptos / Servicios / Productos
           </h2>
           <button
             type="button"
             onClick={handleAddItem}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-xs transition border border-emerald-200"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 font-bold text-xs transition border border-emerald-200 dark:border-emerald-800"
           >
             <Plus size={14} />
             Agregar Ítem
@@ -437,7 +464,7 @@ export const DocumentEditor: React.FC<DocumentEditorProps> = ({
             return (
               <div
                 key={item.id}
-                className="grid grid-cols-12 gap-2 sm:gap-3 p-3 rounded-xl bg-slate-50/70 border border-slate-200/80 items-center"
+                className="grid grid-cols-12 gap-2 sm:gap-3 p-3 rounded-xl bg-slate-50/70 dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-700 items-center"
               >
                 <div className="col-span-12 sm:col-span-6">
                   <label className="block sm:hidden text-[10px] font-bold uppercase text-slate-400 mb-1">
@@ -509,17 +536,17 @@ export const DocumentEditor: React.FC<DocumentEditorProps> = ({
         <button
           type="button"
           onClick={handleAddItem}
-          className="w-full py-2.5 border-2 border-dashed border-slate-200 hover:border-emerald-500 rounded-xl text-xs font-bold text-slate-500 hover:text-emerald-700 hover:bg-emerald-50/20 transition flex items-center justify-center gap-1.5"
+          className="w-full py-2.5 border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-600 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-emerald-700 dark:hover:text-emerald-400 hover:bg-emerald-50/20 dark:hover:bg-emerald-900/10 transition flex items-center justify-center gap-1.5"
         >
           <Plus size={15} />
           Agregar otro concepto o línea
         </button>
 
         {/* Resumen de Totales e Impuestos */}
-        <div className="pt-4 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="pt-4 border-t border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-600">Impuesto / IVA:</span>
-            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+            <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Impuesto / IVA:</span>
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900/60 p-1 rounded-xl">
               {[0, 19].map((rate) => (
                 <button
                   key={rate}
@@ -527,8 +554,8 @@ export const DocumentEditor: React.FC<DocumentEditorProps> = ({
                   onClick={() => handleTaxRateChange(rate)}
                   className={`px-2.5 py-1 rounded-lg text-xs font-bold transition ${
                     (quote.tax_rate || 0) === rate
-                      ? 'bg-white text-emerald-700 shadow-xs'
-                      : 'text-slate-500 hover:text-slate-900'
+                      ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-400 shadow-xs'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
                   }`}
                 >
                   {rate === 0 ? 'Sin IVA (0%)' : `${rate}%`}
@@ -537,28 +564,28 @@ export const DocumentEditor: React.FC<DocumentEditorProps> = ({
             </div>
           </div>
 
-          <div className="w-full sm:w-64 space-y-1.5 bg-slate-50 p-4 rounded-xl border border-slate-200">
-            <div className="flex justify-between text-xs text-slate-500">
+          <div className="w-full sm:w-64 space-y-1.5 bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
               <span>Subtotal:</span>
               <span className="font-semibold">{currency}{formatCurrencyAmount(quote.subtotal, currency)}</span>
             </div>
             {(quote.tax_amount || 0) > 0 && (
-              <div className="flex justify-between text-xs text-slate-500">
+              <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
                 <span>IVA ({quote.tax_rate}%):</span>
                 <span className="font-semibold">{currency}{formatCurrencyAmount(quote.tax_amount || 0, currency)}</span>
               </div>
             )}
-            <div className="flex justify-between text-sm font-black text-slate-900 pt-1.5 border-t border-slate-200">
+            <div className="flex justify-between text-sm font-black text-slate-900 dark:text-white pt-1.5 border-t border-slate-200 dark:border-slate-700">
               <span className="uppercase">Total:</span>
-              <span className="text-emerald-600 text-base">{currency}{formatCurrencyAmount(quote.total, currency)}</span>
+              <span className="text-emerald-600 dark:text-emerald-400 text-base">{currency}{formatCurrencyAmount(quote.total, currency)}</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Notas / Condiciones de Pago */}
-      <div className="bg-white p-4 sm:p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-        <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+      <div className="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-3">
+        <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
           Notas, Términos y Condiciones de Pago
         </label>
         <textarea

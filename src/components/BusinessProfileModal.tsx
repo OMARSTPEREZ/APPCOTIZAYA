@@ -83,13 +83,13 @@ export const BusinessProfileModal: React.FC<BusinessProfileModalProps> = ({
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-8 animate-in fade-in duration-200">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-slate-200 dark:border-slate-700">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-            <Building2 className="text-emerald-600" size={26} />
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+            <Building2 className="text-emerald-600 dark:text-emerald-400" size={26} />
             Configuración de Mi Negocio
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Personaliza el membrete, logo y datos que aparecerán automáticamente en tus cotizaciones y cuentas de cobro.
           </p>
         </div>
@@ -189,7 +189,7 @@ export const BusinessProfileModal: React.FC<BusinessProfileModalProps> = ({
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-12 gap-8">
         {/* Formulario de Datos */}
-        <div className="md:col-span-7 space-y-5 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+        <div className="md:col-span-7 space-y-5 bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="sm:col-span-2">
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
@@ -339,8 +339,8 @@ export const BusinessProfileModal: React.FC<BusinessProfileModalProps> = ({
         {/* Columna Derecha: Logo y Previsualización */}
         <div className="md:col-span-5 space-y-6">
           {/* Carga de Logo */}
-          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-3">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
               Logotipo de tu Empresa
             </h2>
 
@@ -383,12 +383,12 @@ export const BusinessProfileModal: React.FC<BusinessProfileModalProps> = ({
           </div>
 
           {/* Previsualización en Vivo de Membrete */}
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+          <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-xs space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+              <span className="text-[11px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500">
                 Previsualización de Membrete
               </span>
-              <span className="text-[9px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-bold">
+              <span className="text-[9px] bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full font-bold">
                 En vivo
               </span>
             </div>

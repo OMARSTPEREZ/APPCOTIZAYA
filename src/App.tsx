@@ -455,9 +455,22 @@ export function App() {
       {showFreemiumWall && (
         <FreemiumWall
           usedCount={profile.monthly_quote_count || 0}
-          onUpgrade={() => {
+          onUpgrade={(plan) => {
             setShowFreemiumWall(false);
-            window.open('https://github.com/OMARSTPEREZ/APPCOTIZAYA#upgrade', '_blank');
+            // Detección de entorno: web vs nativo
+            const isAndroidApp = (window as any).Android !== undefined;
+            const isIOSApp = (window as any).webkit?.messageHandlers !== undefined;
+            if (isAndroidApp) {
+              (window as any).Android.openBillingFlow?.(plan);
+            } else if (isIOSApp) {
+              (window as any).webkit.messageHandlers.billing?.postMessage({ plan });
+            } else {
+              // Web: redirigir a pasarela de pago
+              const url = plan === 'annual'
+                ? 'https://mpago.la/cotizaya-pro-anual'
+                : 'https://mpago.la/cotizaya-pro-mensual';
+              window.open(url, '_blank');
+            }
           }}
           onClose={() => setShowFreemiumWall(false)}
         />
@@ -483,6 +496,8 @@ export function App() {
                 onSaveDraft={handleSaveDraft}
                 onNewDocument={handleNewDocument}
                 onConvertToInvoice={handleConvertToInvoice}
+                isGuestMode={isGuestMode && !user}
+                onOpenAuthModal={() => setShowAuthModal(true)}
               />
             )}
 
@@ -493,6 +508,7 @@ export function App() {
                 onBackToEdit={() => setActiveTab('editor')}
                 onSaveToHistory={handleSaveToHistory}
                 onConvertToInvoice={handleConvertToInvoice}
+                isGuestMode={isGuestMode && !user}
               />
             )}
 
@@ -537,7 +553,7 @@ export function App() {
       <footer className="no-print py-4 border-t border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 text-center text-xs text-slate-400 dark:text-slate-500 transition-colors duration-200">
         <p className="font-medium">
           CotizaYa! • {user ? `Conectado como ${user.email}` : isGuestMode ? 'Modo Invitado (100% Offline)' : 'Cotizaciones & Cuentas de Cobro'} •{' '}
-          {profile.subscription_tier === 'pro' ? '⭐ Plan Pro' : `Free: ${profile.monthly_quote_count || 0}/5 docs este mes`}
+          {profile.subscription_tier === 'pro' ? '⭐ Plan Pro' : `Free: ${profile.monthly_quote_count || 0}/3 docs este mes`}
         </p>
       </footer>
     </div>
