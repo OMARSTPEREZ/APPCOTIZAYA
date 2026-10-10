@@ -156,19 +156,38 @@ export function FreemiumWall({ usedCount, onUpgrade, onClose, onSyncProStatus }:
             ¡Actualizar a Pro — {selected.price}{selected.period}!
           </button>
 
-          {/* Métodos de pago */}
-          <div className="text-center space-y-2 pt-1">
-            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
-              🇨🇴 Mercado Pago · Nequi · PSE · Tarjetas · In-App Purchase
+          {/* Métodos de Pago Locales de Colombia */}
+          <div className="space-y-2 pt-1 border-t border-slate-100 dark:border-slate-800">
+            <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 dark:text-slate-500 text-center">
+              🇨🇴 Métodos de pago automáticos habilitados
             </p>
-            <div className="flex flex-col items-center gap-1.5 pt-1">
+
+            <div className="flex flex-wrap items-center justify-center gap-1.5 py-1">
+              <span className="px-2.5 py-1 rounded-xl bg-purple-100 dark:bg-purple-950/80 text-purple-900 dark:text-purple-300 text-[11px] font-black border border-purple-200/80 dark:border-purple-800/60 shadow-xs flex items-center gap-1">
+                🟣 Nequi
+              </span>
+              <span className="px-2.5 py-1 rounded-xl bg-red-100 dark:bg-red-950/80 text-red-900 dark:text-red-300 text-[11px] font-black border border-red-200/80 dark:border-red-800/60 shadow-xs flex items-center gap-1">
+                🔴 Daviplata
+              </span>
+              <span className="px-2.5 py-1 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-blue-900 dark:text-blue-300 text-[11px] font-black border border-blue-200/80 dark:border-blue-800/60 shadow-xs flex items-center gap-1">
+                🔵 PSE
+              </span>
+              <span className="px-2.5 py-1 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-900 dark:text-emerald-300 text-[11px] font-black border border-emerald-200/80 dark:border-emerald-800/60 shadow-xs flex items-center gap-1">
+                ⚡ Bre-B
+              </span>
+              <span className="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-bold border border-slate-200 dark:border-slate-700">
+                💳 Tarjetas
+              </span>
+            </div>
+
+            <div className="flex flex-col items-center gap-1.5 pt-2">
               {onSyncProStatus && (
                 <button
                   type="button"
                   onClick={onSyncProStatus}
                   className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline transition cursor-pointer"
                 >
-                  ¿Ya pagaste o activaste tu plan? Sincronizar estado PRO ⚡
+                  ¿Ya realizaste el pago? Sincronizar estado PRO ⚡
                 </button>
               )}
               {onClose && (
