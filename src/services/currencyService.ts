@@ -6,18 +6,18 @@ export interface CurrencyInfo {
 }
 
 export const SUPPORTED_CURRENCIES: CurrencyInfo[] = [
-  { code: 'COP', symbol: 'COP $', label: 'COP $ (Colombia)', locale: 'es-CO' },
-  { code: 'USD', symbol: 'USD $', label: 'USD $ (Dólar EE.UU. / Int)', locale: 'en-US' },
-  { code: 'MXN', symbol: 'MXN $', label: 'MXN $ (México)', locale: 'es-MX' },
-  { code: 'EUR', symbol: '€', label: '€ (Euro - España/Europa)', locale: 'es-ES' },
-  { code: 'PEN', symbol: 'S/', label: 'S/ (Perú)', locale: 'es-PE' },
-  { code: 'CLP', symbol: 'CLP $', label: 'CLP $ (Chile)', locale: 'es-CL' },
-  { code: 'ARS', symbol: 'ARS $', label: 'ARS $ (Argentina)', locale: 'es-AR' },
-  { code: 'GEN', symbol: '$', label: '$ (Genérico)', locale: 'es-CO' },
+  { code: 'COP', symbol: '$ ', label: 'Pesos Colombianos ($ COP)', locale: 'es-CO' },
+  { code: 'USD', symbol: 'USD $ ', label: 'USD $ (Dólar EE.UU. / Int)', locale: 'en-US' },
+  { code: 'MXN', symbol: 'MXN $ ', label: 'MXN $ (México)', locale: 'es-MX' },
+  { code: 'EUR', symbol: '€ ', label: '€ (Euro - España/Europa)', locale: 'es-ES' },
+  { code: 'PEN', symbol: 'S/ ', label: 'S/ (Perú)', locale: 'es-PE' },
+  { code: 'CLP', symbol: 'CLP $ ', label: 'CLP $ (Chile)', locale: 'es-CL' },
+  { code: 'ARS', symbol: 'ARS $ ', label: 'ARS $ (Argentina)', locale: 'es-AR' },
+  { code: 'GEN', symbol: '$ ', label: '$ (Genérico)', locale: 'es-CO' },
 ];
 
 /**
- * Detecta automáticamente la moneda y región según el navegador y zona horaria
+ * Detecta automáticamente la moneda y región según el navegador y zona horaria (Default: COP Pesos Colombianos)
  */
 export const detectRegionalCurrency = (): CurrencyInfo => {
   try {
@@ -49,21 +49,19 @@ export const detectRegionalCurrency = (): CurrencyInfo => {
     console.warn('Error detectando moneda regional:', e);
   }
 
-  // Predeterminado si no coincide
-  return SUPPORTED_CURRENCIES[0]; // Default a COP o $
+  // Predeterminado: Pesos Colombianos ($ COP)
+  return SUPPORTED_CURRENCIES[0];
 };
 
 /**
- * Formatea un número según la moneda seleccionada
+ * Formatea un número según la moneda seleccionada (por defecto en pesos con separadores de miles ej. $ 150.000)
  */
-export const formatCurrencyAmount = (amount: number, symbol: string): string => {
-  const match = SUPPORTED_CURRENCIES.find((c) => c.symbol === symbol);
+export const formatCurrencyAmount = (amount: number, symbol?: string): string => {
+  const match = SUPPORTED_CURRENCIES.find((c) => c.symbol.trim() === (symbol || '').trim() || c.code === symbol);
   const locale = match ? match.locale : 'es-CO';
   try {
-    return Number(amount || 0).toLocaleString(locale, {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    });
+    const num = Math.round(Number(amount || 0));
+    return num.toLocaleString(locale);
   } catch {
     return Number(amount || 0).toLocaleString('es-CO');
   }

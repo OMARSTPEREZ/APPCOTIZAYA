@@ -1,7 +1,7 @@
 import type { BusinessProfile, QuoteDocument } from '../types';
 import { formatCurrencyAmount } from './currencyService';
 
-export type WhatsAppTone = 'formal' | 'amable' | 'directo' | 'cobro';
+export type WhatsAppTone = 'predeterminado' | 'formal' | 'amable' | 'directo' | 'cobro';
 
 export interface WhatsAppTemplate {
   id: WhatsAppTone;
@@ -11,6 +11,12 @@ export interface WhatsAppTemplate {
 }
 
 export const WHATSAPP_TEMPLATES: WhatsAppTemplate[] = [
+  {
+    id: 'predeterminado',
+    name: 'Mensaje Rápido CotizaYa!',
+    icon: '💬',
+    description: 'Texto claro, conciso y profesional listo para enviar.',
+  },
   {
     id: 'formal',
     name: 'Formal / Corporativo',
@@ -38,16 +44,24 @@ export const WHATSAPP_TEMPLATES: WhatsAppTemplate[] = [
 ];
 
 /**
+ * Obtiene el mensaje predeterminado estándar de CotizaYa!
+ */
+export const getDefaultWhatsAppMessage = (quote: QuoteDocument): string => {
+  const docTypeName = quote.document_type === 'cuenta_cobro' ? 'cuenta de cobro' : 'cotización';
+  return `¡Hola! 👋 Te adjunto la ${docTypeName} solicitada a través de CotizaYa!. Quedo atento a tus comentarios.`;
+};
+
+/**
  * Genera el texto profesional para WhatsApp según la plantilla seleccionada
  */
 export const generateWhatsAppMessage = (
   quote: QuoteDocument,
   profile: BusinessProfile,
-  tone: WhatsAppTone = 'formal'
+  tone: WhatsAppTone = 'predeterminado'
 ): string => {
   const isQuote = quote.document_type === 'cotizacion';
   const docTypeName = isQuote ? 'Cotización' : 'Cuenta de Cobro';
-  const currency = profile.currency_symbol || '$';
+  const currency = profile.currency_symbol || '$ ';
   const formattedTotal = formatCurrencyAmount(quote.total, currency);
   const clientName = quote.client_name ? quote.client_name.trim() : 'Estimado(a) Cliente';
 
@@ -56,6 +70,9 @@ export const generateWhatsAppMessage = (
     .join('\n');
 
   switch (tone) {
+    case 'predeterminado':
+      return `¡Hola! 👋 Te adjunto la ${docTypeName.toLowerCase()} solicitada a través de CotizaYa!. Quedo atento a tus comentarios.`;
+
     case 'amable':
       return (
         `¡Hola *${clientName}*! 👋 Espero que estés muy bien.\n\n` +

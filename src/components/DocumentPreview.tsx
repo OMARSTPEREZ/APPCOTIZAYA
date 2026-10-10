@@ -173,12 +173,26 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
               </div>
 
               <div className="flex flex-col items-end text-right space-y-3">
-                {profile.logo_url && (
+                {profile.logo_url ? (
                   <img
                     src={profile.logo_url}
                     alt="Logo"
-                    className="max-h-20 max-w-[200px] object-contain"
+                    className="max-h-20 max-w-[200px] object-contain rounded-lg"
                   />
+                ) : (
+                  <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 shadow-xs select-none">
+                    <div className="w-9 h-9 rounded-lg bg-linear-to-tr from-slate-900 to-slate-700 text-white flex items-center justify-center font-black text-sm tracking-wider shadow-xs">
+                      {(profile.business_name || 'CY').charAt(0).toUpperCase()}
+                    </div>
+                    <div className="text-left">
+                      <p className="text-xs font-black text-slate-900 leading-tight tracking-tight uppercase">
+                        {profile.business_name || 'CotizaYa!'}
+                      </p>
+                      <p className="text-[9px] font-bold text-emerald-700 uppercase tracking-wider">
+                        Documento Oficial
+                      </p>
+                    </div>
+                  </div>
                 )}
 
                 <div className="bg-slate-100 px-4 py-2 rounded-xl border border-slate-200 text-right">

@@ -34,7 +34,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
 
         {/* Título Principal */}
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
-          Crea cotizaciones y cuentas de cobro{' '}
+          <span className="text-emerald-600 dark:text-emerald-400">CotizaYa!</span> — Crea cotizaciones y cuentas de cobro{' '}
           <span className="text-transparent bg-clip-text bg-linear-to-r from-emerald-600 via-teal-500 to-emerald-500">
             profesionales en segundos
           </span>
@@ -42,7 +42,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
 
         {/* Subtítulo */}
         <p className="text-base sm:text-xl text-slate-600 dark:text-slate-300 font-medium max-w-2xl mx-auto leading-relaxed">
-          Diseñado para contratistas, profesionales y negocios independientes. Genera documentos formales en PDF, compártelos por WhatsApp y guarda tu historial sin complicaciones.
+          Diseñado para contratistas, profesionales y negocios independientes. Genera documentos formales en PDF, compártelos por WhatsApp y controla tus cotizaciones sin complicaciones.
         </p>
 
         {/* ── BOTONES DE ACCIÓN PRINCIPALES (CTAs) ───────────────────────── */}
@@ -64,7 +64,7 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
             className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700/80 text-slate-800 dark:text-slate-100 font-extrabold text-sm sm:text-base border border-slate-200 dark:border-slate-700 shadow-xs flex items-center justify-center gap-2.5 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
           >
             <Zap size={18} className="text-amber-500" />
-            <span>Probar como Invitado (Sin Registro)</span>
+            <span>Probar como Invitado</span>
             <ArrowRight size={16} className="text-slate-400 dark:text-slate-500" />
           </button>
         </div>

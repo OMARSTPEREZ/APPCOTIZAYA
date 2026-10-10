@@ -422,7 +422,7 @@ export function App() {
         onSignOut={handleSignOut}
         isDarkMode={isDarkMode}
         onToggleDarkMode={() => setIsDarkMode(prev => !prev)}
-        showExtendedTabs={Boolean(user || isGuestMode)}
+        showExtendedTabs={Boolean(user)}
         isWelcomeScreen={!user && !isGuestMode}
         onGoToWelcome={() => setIsGuestMode(false)}
       />

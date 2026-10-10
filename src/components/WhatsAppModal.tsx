@@ -21,11 +21,9 @@ export const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const [selectedTone, setSelectedTone] = useState<WhatsAppTone>(
-    quote.document_type === 'cuenta_cobro' ? 'cobro' : 'formal'
-  );
+  const [selectedTone, setSelectedTone] = useState<WhatsAppTone>('predeterminado');
   const [customMessage, setCustomMessage] = useState<string>(() =>
-    generateWhatsAppMessage(quote, profile, quote.document_type === 'cuenta_cobro' ? 'cobro' : 'formal')
+    generateWhatsAppMessage(quote, profile, 'predeterminado')
   );
   const [copied, setCopied] = useState(false);
 
