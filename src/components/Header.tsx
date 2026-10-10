@@ -22,6 +22,9 @@ interface HeaderProps {
   onSignOut: () => void;
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
+  showExtendedTabs?: boolean;
+  isWelcomeScreen?: boolean;
+  onGoToWelcome?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -33,6 +36,9 @@ export const Header: React.FC<HeaderProps> = ({
   onSignOut,
   isDarkMode,
   onToggleDarkMode,
+  showExtendedTabs = true,
+  isWelcomeScreen = false,
+  onGoToWelcome,
 }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -70,7 +76,13 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center justify-between h-16 gap-2">
           {/* Brand */}
           <div 
-            onClick={() => setActiveTab('editor')}
+            onClick={() => {
+              if (isWelcomeScreen && onGoToWelcome) {
+                onGoToWelcome();
+              } else {
+                setActiveTab('editor');
+              }
+            }}
             className="flex items-center gap-2 cursor-pointer group select-none shrink-0"
           >
             <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-linear-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform">
@@ -79,7 +91,7 @@ export const Header: React.FC<HeaderProps> = ({
             <div>
               <div className="flex items-center gap-1.5">
                 <span className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white tracking-tight">
-                  Cotiza<span className="text-emerald-600 dark:text-emerald-400">Rápido</span>
+                  Cotiza<span className="text-emerald-600 dark:text-emerald-400">Ya!</span>
                 </span>
                 <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">
                   Free $0
@@ -91,52 +103,58 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Navigation Tabs Desktop */}
-          <nav className="hidden md:flex items-center gap-1 bg-slate-100/90 dark:bg-slate-800/90 p-1 rounded-2xl border border-slate-200/60 dark:border-slate-700">
-            <button
-              onClick={() => setActiveTab('editor')}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
-                activeTab === 'editor'
-                  ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <FileText size={15} />
-              Editor {itemCount > 0 && <span className="w-4 h-4 rounded-full bg-emerald-600 text-white text-[9px] flex items-center justify-center">{itemCount}</span>}
-            </button>
-            <button
-              onClick={() => setActiveTab('preview')}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
-                activeTab === 'preview'
-                  ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <span>👁️</span> Vista Previa & PDF
-            </button>
-            <button
-              onClick={() => setActiveTab('business')}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
-                activeTab === 'business'
-                  ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <Building2 size={15} />
-              Mi Negocio
-            </button>
-            <button
-              onClick={() => setActiveTab('history')}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
-                activeTab === 'history'
-                  ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
-                  : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              <History size={15} />
-              Historial
-            </button>
-          </nav>
+          {/* Navigation Tabs Desktop (Oculta Mi Negocio e Historial si !showExtendedTabs) */}
+          {!isWelcomeScreen && (
+            <nav className="hidden md:flex items-center gap-1 bg-slate-100/90 dark:bg-slate-800/90 p-1 rounded-2xl border border-slate-200/60 dark:border-slate-700">
+              <button
+                onClick={() => setActiveTab('editor')}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                  activeTab === 'editor'
+                    ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <FileText size={15} />
+                Editor {itemCount > 0 && <span className="w-4 h-4 rounded-full bg-emerald-600 text-white text-[9px] flex items-center justify-center">{itemCount}</span>}
+              </button>
+              <button
+                onClick={() => setActiveTab('preview')}
+                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                  activeTab === 'preview'
+                    ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <span>👁️</span> Vista Previa & PDF
+              </button>
+              {showExtendedTabs && (
+                <>
+                  <button
+                    onClick={() => setActiveTab('business')}
+                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                      activeTab === 'business'
+                        ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    <Building2 size={15} />
+                    Mi Negocio
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('history')}
+                    className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
+                      activeTab === 'history'
+                        ? 'bg-white dark:bg-slate-700 text-emerald-700 dark:text-emerald-300 shadow-xs'
+                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'
+                    }`}
+                  >
+                    <History size={15} />
+                    Historial
+                  </button>
+                </>
+              )}
+            </nav>
+          )}
 
           {/* Right Header Area: Authenticated User Dropdown or Guest / Sign In */}
           <div className="flex items-center gap-2">
@@ -308,7 +326,7 @@ export const Header: React.FC<HeaderProps> = ({
                         <div className="flex-1">
                           <p className="leading-tight">Cerrar Sesión</p>
                           <p className="text-[10px] text-red-500/80 font-normal">
-                            Regresar a modo offline/invitado
+                            Regresar a pantalla de bienvenida
                           </p>
                         </div>
                       </button>
@@ -319,16 +337,18 @@ export const Header: React.FC<HeaderProps> = ({
             ) : (
               /* ESTADO INVITADO / OFFLINE (Boton Ingresar visible) */
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg hidden sm:inline">
-                  Modo Offline
-                </span>
+                {!isWelcomeScreen && (
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg hidden sm:inline">
+                    Modo Offline
+                  </span>
+                )}
                 <button
                   type="button"
                   onClick={onOpenAuthModal}
-                  className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-extrabold text-[11px] sm:text-xs shadow-xs transition active:scale-95"
+                  className="flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white font-extrabold text-[11px] sm:text-xs shadow-xs transition active:scale-95 cursor-pointer"
                 >
                   <LogIn size={13} />
-                  <span>Ingresar</span>
+                  <span>Iniciar Sesión</span>
                 </button>
               </div>
             )}
@@ -336,53 +356,59 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Mobile Tab Bar: ONLY 4 core tabs (No Google tab, No Cuenta tab) */}
-      <div className="md:hidden flex items-center justify-around border-t border-slate-100 dark:border-slate-800 px-2 py-1.5 bg-white dark:bg-slate-900 transition-colors duration-200">
-        <button
-          onClick={() => setActiveTab('editor')}
-          className={`flex flex-col items-center gap-1 py-1 px-3 text-[10px] font-bold rounded-lg transition-colors ${
-            activeTab === 'editor' 
-              ? 'text-emerald-700 dark:text-emerald-400' 
-              : 'text-slate-500 dark:text-slate-400'
-          }`}
-        >
-          <FileText size={17} />
-          <span>Editor</span>
-        </button>
-        <button
-          onClick={() => setActiveTab('preview')}
-          className={`flex flex-col items-center gap-1 py-1 px-3 text-[10px] font-bold rounded-lg transition-colors ${
-            activeTab === 'preview' 
-              ? 'text-emerald-700 dark:text-emerald-400' 
-              : 'text-slate-500 dark:text-slate-400'
-          }`}
-        >
-          <span className="text-base leading-none">👁️</span>
-          <span>PDF</span>
-        </button>
-        <button
-          onClick={() => setActiveTab('business')}
-          className={`flex flex-col items-center gap-1 py-1 px-3 text-[10px] font-bold rounded-lg transition-colors ${
-            activeTab === 'business' 
-              ? 'text-emerald-700 dark:text-emerald-400' 
-              : 'text-slate-500 dark:text-slate-400'
-          }`}
-        >
-          <Building2 size={17} />
-          <span>Negocio</span>
-        </button>
-        <button
-          onClick={() => setActiveTab('history')}
-          className={`flex flex-col items-center gap-1 py-1 px-3 text-[10px] font-bold rounded-lg transition-colors ${
-            activeTab === 'history' 
-              ? 'text-emerald-700 dark:text-emerald-400' 
-              : 'text-slate-500 dark:text-slate-400'
-          }`}
-        >
-          <History size={17} />
-          <span>Historial</span>
-        </button>
-      </div>
+      {/* Mobile Tab Bar: Únicamente visible cuando está dentro de la app (no en la pantalla de bienvenida) */}
+      {!isWelcomeScreen && (
+        <div className="md:hidden flex items-center justify-around border-t border-slate-100 dark:border-slate-800 px-2 py-1.5 bg-white dark:bg-slate-900 transition-colors duration-200">
+          <button
+            onClick={() => setActiveTab('editor')}
+            className={`flex flex-col items-center gap-1 py-1 px-3 text-[10px] font-bold rounded-lg transition-colors ${
+              activeTab === 'editor' 
+                ? 'text-emerald-700 dark:text-emerald-400' 
+                : 'text-slate-500 dark:text-slate-400'
+            }`}
+          >
+            <FileText size={17} />
+            <span>Editor</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('preview')}
+            className={`flex flex-col items-center gap-1 py-1 px-3 text-[10px] font-bold rounded-lg transition-colors ${
+              activeTab === 'preview' 
+                ? 'text-emerald-700 dark:text-emerald-400' 
+                : 'text-slate-500 dark:text-slate-400'
+            }`}
+          >
+            <span className="text-base leading-none">👁️</span>
+            <span>PDF</span>
+          </button>
+          {showExtendedTabs && (
+            <>
+              <button
+                onClick={() => setActiveTab('business')}
+                className={`flex flex-col items-center gap-1 py-1 px-3 text-[10px] font-bold rounded-lg transition-colors ${
+                  activeTab === 'business' 
+                    ? 'text-emerald-700 dark:text-emerald-400' 
+                    : 'text-slate-500 dark:text-slate-400'
+                }`}
+              >
+                <Building2 size={17} />
+                <span>Negocio</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('history')}
+                className={`flex flex-col items-center gap-1 py-1 px-3 text-[10px] font-bold rounded-lg transition-colors ${
+                  activeTab === 'history' 
+                    ? 'text-emerald-700 dark:text-emerald-400' 
+                    : 'text-slate-500 dark:text-slate-400'
+                }`}
+              >
+                <History size={17} />
+                <span>Historial</span>
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </header>
   );
 };

@@ -8,6 +8,7 @@ interface AuthModalProps {
   onSignInWithEmail: (email: string, pass: string) => Promise<void>;
   onSignUpWithEmail: (email: string, pass: string) => Promise<void>;
   isConnecting?: boolean;
+  onContinueAsGuest?: () => void;
 }
 
 export const AuthModal: React.FC<AuthModalProps> = ({
@@ -17,6 +18,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onSignInWithEmail,
   onSignUpWithEmail,
   isConnecting = false,
+  onContinueAsGuest,
 }) => {
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
@@ -238,7 +240,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           <div className="pt-2 text-center border-t border-slate-100">
             <button
               type="button"
-              onClick={onClose}
+              onClick={() => {
+                if (onContinueAsGuest) {
+                  onContinueAsGuest();
+                }
+                onClose();
+              }}
               className="text-xs font-bold text-slate-500 hover:text-slate-800 transition inline-flex items-center gap-1.5"
             >
               <User size={13} />

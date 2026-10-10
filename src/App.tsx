@@ -9,6 +9,7 @@ import { EmptyState } from './components/EmptyState';
 import { FreemiumWall } from './components/FreemiumWall';
 import { PublicView } from './components/PublicView';
 import { AuthModal } from './components/AuthModal';
+import { WelcomeLanding } from './components/WelcomeLanding';
 import type { BusinessProfile, QuoteDocument, QuoteValidationErrors } from './types';
 import { validateQuote, canGenerateDocument } from './types';
 import {
@@ -96,6 +97,16 @@ export function App() {
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
   const [showFreemiumWall, setShowFreemiumWall] = useState(false);
   const [validationErrors, setValidationErrors] = useState<QuoteValidationErrors>({});
+  const [isGuestMode, setIsGuestMode] = useState<boolean>(() => {
+    return sessionStorage.getItem('cotizaya_guest_access') === 'true';
+  });
+
+  const handleEnterGuest = () => {
+    setIsGuestMode(true);
+    sessionStorage.setItem('cotizaya_guest_access', 'true');
+    setActiveTab('editor');
+    showToast('⚡ Modo Invitado activado. Creando cotización...');
+  };
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     const saved = localStorage.getItem('cotizarapido_theme');
     if (saved) return saved === 'dark';
@@ -193,6 +204,8 @@ export function App() {
       setUser(currentUser);
       if (currentUser) {
         setIsCloudConnected(true);
+        setIsGuestMode(false);
+        setActiveTab('editor');
         const remote = await fetchProfileFromSupabase();
         if (remote) {
           setProfile(remote);
@@ -206,7 +219,9 @@ export function App() {
         }
       } else if (event === 'SIGNED_OUT') {
         setIsCloudConnected(false);
-        showToast('Sesión cerrada. Modo Offline activo.');
+        setIsGuestMode(false);
+        sessionStorage.removeItem('cotizaya_guest_access');
+        showToast('Sesión cerrada. Modo Offline.');
       }
     });
 
@@ -231,6 +246,8 @@ export function App() {
     try {
       await signInWithGoogle();
       setShowAuthModal(false);
+      setIsGuestMode(false);
+      setActiveTab('editor');
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : 'Error al conectar con Google';
       console.warn('Google Auth notice:', errorMsg);
@@ -246,6 +263,8 @@ export function App() {
     if (res?.user) {
       setUser(res.user);
       setIsCloudConnected(true);
+      setIsGuestMode(false);
+      setActiveTab('editor');
       showToast(`👋 ¡Bienvenido, ${res.user.email}!`);
       handleSyncHistory(res.user);
     }
@@ -259,7 +278,9 @@ export function App() {
     await signOut();
     setUser(null);
     setIsCloudConnected(false);
-    showToast('Sesión cerrada. Continuando en Modo Offline.');
+    setIsGuestMode(false);
+    sessionStorage.removeItem('cotizaya_guest_access');
+    showToast('Sesión cerrada. Regresando a la pantalla de bienvenida.');
   };
 
   // ── Handlers de Documentos ────────────────────────────────────────────────
@@ -391,13 +412,19 @@ export function App() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans transition-colors duration-200">
       <Header
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={(tab) => {
+          setIsGuestMode(true);
+          setActiveTab(tab);
+        }}
         itemCount={quote.items.length}
         user={user}
         onOpenAuthModal={() => setShowAuthModal(true)}
         onSignOut={handleSignOut}
         isDarkMode={isDarkMode}
         onToggleDarkMode={() => setIsDarkMode(prev => !prev)}
+        showExtendedTabs={Boolean(user || isGuestMode)}
+        isWelcomeScreen={!user && !isGuestMode}
+        onGoToWelcome={() => setIsGuestMode(false)}
       />
 
       {/* Toast Notification */}
@@ -421,6 +448,7 @@ export function App() {
         onSignInWithEmail={handleSignInWithEmail}
         onSignUpWithEmail={handleSignUpWithEmail}
         isConnecting={isAuthLoading}
+        onContinueAsGuest={handleEnterGuest}
       />
 
       {/* Muro de pago Freemium */}
@@ -437,69 +465,78 @@ export function App() {
 
       {/* Contenido Principal */}
       <main className="flex-1">
-        {activeTab === 'editor' && (
-          <DocumentEditor
-            quote={quote}
-            setQuote={setQuote}
-            profile={profile}
-            validationErrors={validationErrors}
-            onUpdateProfileCurrency={handleUpdateProfileCurrency}
-            onGoToPreview={() => setActiveTab('preview')}
-            onSaveDraft={handleSaveDraft}
-            onNewDocument={handleNewDocument}
-            onConvertToInvoice={handleConvertToInvoice}
+        {!user && !isGuestMode ? (
+          <WelcomeLanding
+            onOpenAuthModal={() => setShowAuthModal(true)}
+            onEnterGuest={handleEnterGuest}
           />
-        )}
+        ) : (
+          <>
+            {activeTab === 'editor' && (
+              <DocumentEditor
+                quote={quote}
+                setQuote={setQuote}
+                profile={profile}
+                validationErrors={validationErrors}
+                onUpdateProfileCurrency={handleUpdateProfileCurrency}
+                onGoToPreview={() => setActiveTab('preview')}
+                onSaveDraft={handleSaveDraft}
+                onNewDocument={handleNewDocument}
+                onConvertToInvoice={handleConvertToInvoice}
+              />
+            )}
 
-        {activeTab === 'preview' && (
-          <DocumentPreview
-            quote={quote}
-            profile={profile}
-            onBackToEdit={() => setActiveTab('editor')}
-            onSaveToHistory={handleSaveToHistory}
-            onConvertToInvoice={handleConvertToInvoice}
-          />
-        )}
+            {activeTab === 'preview' && (
+              <DocumentPreview
+                quote={quote}
+                profile={profile}
+                onBackToEdit={() => setActiveTab('editor')}
+                onSaveToHistory={handleSaveToHistory}
+                onConvertToInvoice={handleConvertToInvoice}
+              />
+            )}
 
-        {activeTab === 'business' && (
-          <BusinessProfileModal
-            profile={profile}
-            onSaveProfile={handleSaveProfile}
-            isCloudConnected={isCloudConnected}
-            user={user}
-            onSignInWithGoogle={() => setShowAuthModal(true)}
-            onSignOut={handleSignOut}
-            onSyncHistory={handleSyncHistory}
-            isSyncing={isSyncing}
-          />
-        )}
+            {activeTab === 'business' && (
+              <BusinessProfileModal
+                profile={profile}
+                onSaveProfile={handleSaveProfile}
+                isCloudConnected={isCloudConnected}
+                user={user}
+                onSignInWithGoogle={() => setShowAuthModal(true)}
+                onSignOut={handleSignOut}
+                onSyncHistory={handleSyncHistory}
+                isSyncing={isSyncing}
+              />
+            )}
 
-        {activeTab === 'history' && (
-          history.length === 0 ? (
-            <EmptyState
-              type="history"
-              onCreateNew={() => {
-                handleNewDocument();
-                setActiveTab('editor');
-              }}
-            />
-          ) : (
-            <DocumentHistory
-              history={history}
-              profile={profile}
-              onLoadQuote={handleLoadQuote}
-              onDeleteQuote={handleDeleteQuote}
-              onGoToEditor={() => setActiveTab('editor')}
-              onConvertToInvoice={handleConvertToInvoice}
-            />
-          )
+            {activeTab === 'history' && (
+              history.length === 0 ? (
+                <EmptyState
+                  type="history"
+                  onCreateNew={() => {
+                    handleNewDocument();
+                    setActiveTab('editor');
+                  }}
+                />
+              ) : (
+                <DocumentHistory
+                  history={history}
+                  profile={profile}
+                  onLoadQuote={handleLoadQuote}
+                  onDeleteQuote={handleDeleteQuote}
+                  onGoToEditor={() => setActiveTab('editor')}
+                  onConvertToInvoice={handleConvertToInvoice}
+                />
+              )
+            )}
+          </>
         )}
       </main>
 
       {/* Footer */}
       <footer className="no-print py-4 border-t border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 text-center text-xs text-slate-400 dark:text-slate-500 transition-colors duration-200">
         <p className="font-medium">
-          CotizaRápido • {user ? `Conectado como ${user.email}` : 'Modo Offline (100% Funcional)'} •{' '}
+          CotizaYa! • {user ? `Conectado como ${user.email}` : isGuestMode ? 'Modo Invitado (100% Offline)' : 'Cotizaciones & Cuentas de Cobro'} •{' '}
           {profile.subscription_tier === 'pro' ? '⭐ Plan Pro' : `Free: ${profile.monthly_quote_count || 0}/5 docs este mes`}
         </p>
       </footer>
