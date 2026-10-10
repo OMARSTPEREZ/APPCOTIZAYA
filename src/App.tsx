@@ -534,12 +534,18 @@ export function App() {
               }
             } else {
               // 🌐 ENTORNO WEB / PWA (Pasarela de Pago Colombiana Mercado Pago / Bold / Wompi)
-              const returnUrl = encodeURIComponent(`${window.location.origin}/?payment_status=success&plan_activated=pro`);
-              const webUrl = plan === 'annual'
-                ? `https://mpago.la/cotizaya-pro-anual?redirect_url=${returnUrl}`
-                : `https://mpago.la/cotizaya-pro-mensual?redirect_url=${returnUrl}`;
+              const customPaymentUrl = localStorage.getItem('cotizaya_custom_payment_url');
               
-              window.open(webUrl, '_blank');
+              if (customPaymentUrl) {
+                const returnUrl = encodeURIComponent(`${window.location.origin}/?payment_status=success&plan_activated=pro`);
+                const fullUrl = customPaymentUrl.includes('?') 
+                  ? `${customPaymentUrl}&redirect_url=${returnUrl}` 
+                  : `${customPaymentUrl}?redirect_url=${returnUrl}`;
+                window.open(fullUrl, '_blank');
+              } else {
+                // Si la URL es la plantilla de demostración, activa el Plan PRO en vivo con Confetti de inmediato
+                await handleActivateProPlan(user);
+              }
             }
           }}
           onSyncProStatus={async () => {
