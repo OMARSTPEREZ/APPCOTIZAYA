@@ -291,3 +291,27 @@ export const saveQuoteToSupabase = async (quote: QuoteDocument, userId?: string)
     return null;
   }
 };
+
+// Sincronizar historial local completo con Supabase
+export const syncLocalHistoryWithSupabase = async (
+  localHistory: QuoteDocument[],
+  userId: string
+): Promise<{ uploaded: number; total: number }> => {
+  const client = getSupabase();
+  if (!client || !userId || localHistory.length === 0) {
+    return { uploaded: 0, total: 0 };
+  }
+
+  let uploaded = 0;
+  for (const quote of localHistory) {
+    try {
+      const res = await saveQuoteToSupabase(quote, userId);
+      if (res) uploaded++;
+    } catch {
+      // Continuar con el siguiente
+    }
+  }
+
+  return { uploaded, total: localHistory.length };
+};
+

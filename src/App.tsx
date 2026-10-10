@@ -19,12 +19,15 @@ import {
   saveDraft,
   loadHistory,
   saveToHistory,
+  saveFullHistory,
   deleteFromHistory
 } from './services/storageService';
 import { 
   getSupabase, 
   saveProfileToSupabase, 
   saveQuoteToSupabase,
+  syncLocalHistoryWithSupabase,
+  fetchQuotesFromSupabase,
   signInWithGoogle,
   signOut,
   getCurrentUser,
@@ -74,7 +77,7 @@ export function App() {
     return <PublicView token={publicToken} />;
   }
 
-  // ── Estado principal ──────────────────────────────────────────────────────
+  // ── Estado principal (Offline-First por defecto) ───────────────────────────
   const [activeTab, setActiveTab] = useState<'editor' | 'preview' | 'business' | 'history' | 'cloud'>('editor');
   const [profile, setProfile] = useState<BusinessProfile>(() => loadProfile());
   const [history, setHistory] = useState<QuoteDocument[]>(() => loadHistory());
@@ -87,6 +90,7 @@ export function App() {
   const [isCloudConnected, setIsCloudConnected] = useState<boolean>(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
   const [showFreemiumWall, setShowFreemiumWall] = useState(false);
@@ -98,12 +102,48 @@ export function App() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Verificar conexión Supabase y usuario autenticado
+  // Función para sincronizar historial local con la nube de Google / Supabase
+  const handleSyncHistory = async (targetUser?: SupabaseUser | null) => {
+    const activeUser = targetUser || user;
+    if (!activeUser) {
+      setShowAuthModal(true);
+      return;
+    }
+    setIsSyncing(true);
+    try {
+      // 1. Respaldar perfil de negocio
+      await saveProfileToSupabase(profile, activeUser.id);
+      
+      // 2. Subir cotizaciones locales
+      const currentHistory = loadHistory();
+      const { uploaded } = await syncLocalHistoryWithSupabase(currentHistory, activeUser.id);
+      
+      // 3. Traer cotizaciones remotas existentes
+      const remoteQuotes = await fetchQuotesFromSupabase();
+      if (remoteQuotes.length > 0) {
+        const localIds = new Set(currentHistory.map((h) => h.id));
+        const newFromRemote = remoteQuotes.filter((r) => !localIds.has(r.id));
+        if (newFromRemote.length > 0) {
+          const merged = [...currentHistory, ...newFromRemote];
+          setHistory(merged);
+          saveFullHistory(merged);
+        }
+      }
+      showToast(`☁️ ¡Historial respaldado en Google con éxito! (${uploaded} documentos sincronizados)`);
+    } catch (err) {
+      console.warn('Sync notice:', err);
+      showToast('⚠️ Datos guardados localmente');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // Verificar conexión Supabase y usuario autenticado (sin bloquear offline)
   useEffect(() => {
     const client = getSupabase();
     if (!client) return;
 
-    // 0. Probar conexión activa inmediata con Supabase
+    // 0. Probar conexión activa inmediata con Supabase en segundo plano
     const pingSupabase = async () => {
       try {
         const { error } = await client.from('profiles').select('id').limit(1);
@@ -111,7 +151,7 @@ export function App() {
           setIsCloudConnected(true);
         }
       } catch {
-        // Ignorar si no responde
+        // Modo offline silencioso
       }
     };
     pingSupabase();
@@ -146,10 +186,11 @@ export function App() {
         }
         if (event === 'SIGNED_IN') {
           showToast(`👋 ¡Bienvenido, ${currentUser.user_metadata?.full_name || 'Usuario'}!`);
+          handleSyncHistory(currentUser);
         }
       } else if (event === 'SIGNED_OUT') {
         setIsCloudConnected(false);
-        showToast('Sesión cerrada. Modo Invitado activo.');
+        showToast('Sesión cerrada. Modo Offline activo.');
       }
     });
 
@@ -179,7 +220,6 @@ export function App() {
       console.warn('Google Auth notice:', errorMsg);
       showToast(`⚠️ ${errorMsg}`, 'error');
       setShowAuthModal(false);
-      setActiveTab('cloud');
     } finally {
       setIsAuthLoading(false);
     }
@@ -189,7 +229,7 @@ export function App() {
     await signOut();
     setUser(null);
     setIsCloudConnected(false);
-    showToast('Sesión cerrada. Continuando en Modo Invitado.');
+    showToast('Sesión cerrada. Continuando en Modo Offline.');
   };
 
   // ── Handlers de Documentos ────────────────────────────────────────────────
@@ -253,12 +293,13 @@ export function App() {
     setProfile(updatedProfile);
     saveProfile(updatedProfile);
 
-    // 4. Guardar en historial
+    // 4. Guardar en historial local (Offline-first)
     const updatedHistory = saveToHistory(quote);
     setHistory(updatedHistory);
 
-    if (isCloudConnected) {
-      saveQuoteToSupabase(quote);
+    // 5. Si hay usuario conectado, sincronizar en segundo plano
+    if (isCloudConnected && user) {
+      saveQuoteToSupabase(quote, user.id);
     }
 
     showToast('✅ Documento guardado en historial');
@@ -289,8 +330,8 @@ export function App() {
     const updatedHistory = saveToHistory(newInvoice);
     setHistory(updatedHistory);
 
-    if (isCloudConnected) {
-      saveQuoteToSupabase(newInvoice);
+    if (isCloudConnected && user) {
+      saveQuoteToSupabase(newInvoice, user.id);
     }
 
     setActiveTab('preview');
@@ -392,6 +433,11 @@ export function App() {
             profile={profile}
             onSaveProfile={handleSaveProfile}
             isCloudConnected={isCloudConnected}
+            user={user}
+            onSignInWithGoogle={() => setShowAuthModal(true)}
+            onSignOut={handleSignOut}
+            onSyncHistory={handleSyncHistory}
+            isSyncing={isSyncing}
           />
         )}
 
@@ -426,7 +472,7 @@ export function App() {
       {/* Footer */}
       <footer className="no-print py-4 border-t border-slate-200/80 bg-white text-center text-xs text-slate-400">
         <p className="font-medium">
-          CotizaRápido • {user ? `Conectado como ${user.email}` : 'Modo Invitado (Offline)'} •{' '}
+          CotizaRápido • {user ? `Conectado como ${user.email}` : 'Modo Offline (100% Funcional)'} •{' '}
           {profile.subscription_tier === 'pro' ? '⭐ Plan Pro' : `Free: ${profile.monthly_quote_count || 0}/5 docs este mes`}
         </p>
       </footer>

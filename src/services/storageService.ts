@@ -99,3 +99,12 @@ export const deleteFromHistory = (id: string): QuoteDocument[] => {
     return [];
   }
 };
+
+export const saveFullHistory = (quotes: QuoteDocument[]): void => {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(quotes));
+  } catch (e) {
+    console.error('Error guardando historial completo:', e);
+  }
+};
+
