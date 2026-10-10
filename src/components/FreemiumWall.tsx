@@ -22,6 +22,8 @@ export function FreemiumWall({ usedCount, onUpgrade, onClose }: FreemiumWallProp
     if (onUpgrade) onUpgrade(billingCycle);
   };
 
+  const isLimitReached = usedCount >= FREE_QUOTA_LIMIT;
+
   return (
     <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white dark:bg-slate-900 w-full max-w-md rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden border border-slate-200/50 dark:border-slate-700/50">
@@ -30,7 +32,7 @@ export function FreemiumWall({ usedCount, onUpgrade, onClose }: FreemiumWallProp
         {onClose && (
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 z-10 p-1.5 rounded-full text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            className="absolute top-4 right-4 z-10 p-1.5 rounded-full text-white/80 hover:text-white hover:bg-white/20 transition cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -46,15 +48,30 @@ export function FreemiumWall({ usedCount, onUpgrade, onClose }: FreemiumWallProp
             <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-white/15 backdrop-blur flex items-center justify-center border border-white/20 shadow-inner">
               <Crown className="text-yellow-300" size={30} />
             </div>
-            <div className="inline-flex items-center gap-1.5 bg-white/15 text-white text-[11px] font-bold px-3 py-1 rounded-full mb-3 border border-white/20">
-              <Zap size={11} className="text-yellow-300" />
-              LÍMITE ALCANZADO
-            </div>
-            <h2 className="text-2xl font-black text-white mb-1">¡Pasa a Pro!</h2>
-            <p className="text-white/75 text-sm leading-relaxed">
-              Has usado <strong className="text-white">{usedCount}</strong> de{' '}
-              <strong className="text-white">{FREE_QUOTA_LIMIT}</strong> documentos gratuitos este mes.
-            </p>
+
+            {isLimitReached ? (
+              <>
+                <div className="inline-flex items-center gap-1.5 bg-white/15 text-white text-[11px] font-bold px-3 py-1 rounded-full mb-3 border border-white/20">
+                  <Zap size={11} className="text-yellow-300 animate-pulse" />
+                  LÍMITE ALCANZADO
+                </div>
+                <h2 className="text-2xl font-black text-white mb-1">¡Pasa a Pro!</h2>
+                <p className="text-white/85 text-sm leading-relaxed">
+                  Has alcanzado el límite de <strong className="text-white font-black">{FREE_QUOTA_LIMIT}</strong> documentos gratuitos de este mes.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="inline-flex items-center gap-1.5 bg-white/15 text-white text-[11px] font-bold px-3 py-1 rounded-full mb-3 border border-white/20">
+                  <Star size={11} className="text-yellow-300" />
+                  PLANES & PRECIOS PRO
+                </div>
+                <h2 className="text-2xl font-black text-white mb-1">¡Pasa a Pro!</h2>
+                <p className="text-white/85 text-sm leading-relaxed">
+                  Cotizaciones e impresiones ilimitadas, sin marca de agua y con respaldo en la nube.
+                </p>
+              </>
+            )}
           </div>
         </div>
 
