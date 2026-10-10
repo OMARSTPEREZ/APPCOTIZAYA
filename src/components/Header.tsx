@@ -10,7 +10,8 @@ import {
   Sun, 
   Moon, 
   ChevronDown,
-  ShieldCheck
+  ShieldCheck,
+  Crown
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -25,6 +26,8 @@ interface HeaderProps {
   showExtendedTabs?: boolean;
   isWelcomeScreen?: boolean;
   onGoToWelcome?: () => void;
+  onOpenFreemiumWall?: () => void;
+  subscriptionTier?: 'free' | 'pro';
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -39,6 +42,8 @@ export const Header: React.FC<HeaderProps> = ({
   showExtendedTabs = true,
   isWelcomeScreen = false,
   onGoToWelcome,
+  onOpenFreemiumWall,
+  subscriptionTier = 'free',
 }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -93,9 +98,30 @@ export const Header: React.FC<HeaderProps> = ({
                 <span className="font-extrabold text-base sm:text-lg text-slate-900 dark:text-white tracking-tight">
                   Cotiza<span className="text-emerald-600 dark:text-emerald-400">Ya!</span>
                 </span>
-                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">
-                  Free $0
-                </span>
+                {subscriptionTier === 'pro' ? (
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenFreemiumWall?.();
+                    }}
+                    className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 via-emerald-500 to-teal-500 text-white shadow-xs flex items-center gap-1 cursor-pointer hover:scale-105 transition-transform"
+                    title="Plan PRO Activo — Cotizaciones e Impresiones Ilimitadas"
+                  >
+                    <span>PRO</span>
+                    <Crown size={11} className="text-amber-200 fill-amber-200 shrink-0" />
+                  </span>
+                ) : (
+                  <span
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenFreemiumWall?.();
+                    }}
+                    className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-900 transition-colors cursor-pointer"
+                    title="Plan Free $0 — Haz clic para ver Planes PRO"
+                  >
+                    Free $0
+                  </span>
+                )}
               </div>
               <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-medium hidden sm:block">
                 Cotizaciones y Cuentas de Cobro en PDF
@@ -158,6 +184,23 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Right Header Area: Authenticated User Dropdown or Guest / Sign In */}
           <div className="flex items-center gap-2">
+            {/* Botón Ver Planes / Estado PRO */}
+            {onOpenFreemiumWall && (
+              <button
+                type="button"
+                onClick={onOpenFreemiumWall}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl font-extrabold text-[11px] sm:text-xs shadow-xs hover:shadow transition active:scale-95 cursor-pointer shrink-0 ${
+                  subscriptionTier === 'pro'
+                    ? 'bg-gradient-to-r from-amber-500 via-emerald-600 to-teal-600 text-white'
+                    : 'bg-gradient-to-r from-amber-500 to-emerald-600 hover:from-amber-600 hover:to-emerald-700 text-white'
+                }`}
+                title={subscriptionTier === 'pro' ? 'Tu suscripción PRO está Activa' : 'Ver Planes y Precios PRO'}
+              >
+                <Crown size={14} className="text-amber-200 shrink-0 animate-pulse" />
+                <span>{subscriptionTier === 'pro' ? 'PLAN PRO ✨' : 'Ver Planes PRO'}</span>
+              </button>
+            )}
+
             {/* Quick Dark Mode button for Guest/Offline users */}
             {!user && (
               <button
@@ -245,6 +288,27 @@ export const Header: React.FC<HeaderProps> = ({
 
                     {/* Accesos rápidos */}
                     <div className="py-1">
+                      {onOpenFreemiumWall && (
+                        <button
+                          onClick={() => {
+                            setShowUserMenu(false);
+                            onOpenFreemiumWall();
+                          }}
+                          className="w-full px-4 py-2.5 text-left text-xs font-bold text-amber-700 dark:text-amber-300 bg-amber-50/60 dark:bg-amber-950/30 hover:bg-amber-100 dark:hover:bg-amber-950/60 flex items-center gap-2.5 transition border-y border-amber-100 dark:border-amber-900/30"
+                        >
+                          <Crown size={16} className="text-amber-500 shrink-0 animate-bounce" />
+                          <div className="flex-1">
+                            <p className="leading-tight flex items-center gap-1">
+                              <span>Planes & Precios PRO</span>
+                              <span className="text-[9px] bg-amber-500 text-white px-1.5 py-0.2 rounded-full uppercase">Ilimitado</span>
+                            </p>
+                            <p className="text-[10px] text-amber-600/80 dark:text-amber-400/80 font-normal">
+                              Desde $15.000 COP/mes
+                            </p>
+                          </div>
+                        </button>
+                      )}
+
                       <button
                         onClick={() => {
                           setShowUserMenu(false);

@@ -10,17 +10,20 @@ import {
   Share2, 
   Building2, 
   ShieldCheck,
-  Zap
+  Zap,
+  Crown
 } from 'lucide-react';
 
 interface WelcomeLandingProps {
   onOpenAuthModal: () => void;
   onEnterGuest: () => void;
+  onOpenFreemiumWall?: () => void;
 }
 
 export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
   onOpenAuthModal,
   onEnterGuest,
+  onOpenFreemiumWall,
 }) => {
   return (
     <div className="w-full min-h-[calc(100vh-4rem)] flex flex-col justify-between px-4 sm:px-6 py-8 sm:py-12 max-w-6xl mx-auto">
@@ -67,6 +70,18 @@ export const WelcomeLanding: React.FC<WelcomeLandingProps> = ({
             <span>Probar como Invitado</span>
             <ArrowRight size={16} className="text-slate-400 dark:text-slate-500" />
           </button>
+
+          {/* Llamada a la Acción Terciaria: Ver Planes PRO */}
+          {onOpenFreemiumWall && (
+            <button
+              type="button"
+              onClick={onOpenFreemiumWall}
+              className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 to-emerald-600 hover:from-amber-600 hover:to-emerald-700 text-white font-extrabold text-sm sm:text-base shadow-md flex items-center justify-center gap-2 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+            >
+              <Crown size={18} className="text-amber-200 animate-pulse" />
+              <span>Ver Planes PRO</span>
+            </button>
+          )}
         </div>
 
         <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { Header } from './components/Header';
 import { BusinessProfileModal } from './components/BusinessProfileModal';
@@ -107,6 +107,8 @@ export function App() {
     setActiveTab('editor');
     showToast('⚡ Modo Invitado activado. Creando cotización...');
   };
+  const hasShownWelcomeRef = useRef(false);
+
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     const saved = localStorage.getItem('cotizarapido_theme');
     if (saved) return saved === 'dark';
@@ -129,11 +131,11 @@ export function App() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Función para sincronizar historial local con la nube de Google / Supabase
-  const handleSyncHistory = async (targetUser?: SupabaseUser | null) => {
+  // Función para sincronizar historial local con la nube de Google / Supabase (Silencioso por defecto)
+  const handleSyncHistory = async (targetUser?: SupabaseUser | null, silent = true) => {
     const activeUser = targetUser || user;
     if (!activeUser) {
-      setShowAuthModal(true);
+      if (!silent) setShowAuthModal(true);
       return;
     }
     setIsSyncing(true);
@@ -156,10 +158,12 @@ export function App() {
           saveFullHistory(merged);
         }
       }
-      showToast(`☁️ ¡Historial respaldado con éxito! (${uploaded} documentos sincronizados)`);
+      if (!silent && uploaded > 0) {
+        showToast(`☁️ ¡Historial respaldado con éxito! (${uploaded} documentos sincronizados)`);
+      }
     } catch (err) {
       console.warn('Sync notice:', err);
-      showToast('⚠️ Datos guardados localmente');
+      if (!silent) showToast('⚠️ Datos guardados localmente');
     } finally {
       setIsSyncing(false);
     }
@@ -205,7 +209,7 @@ export function App() {
       if (currentUser) {
         setIsCloudConnected(true);
         setIsGuestMode(false);
-        setActiveTab('editor');
+        
         const remote = await fetchProfileFromSupabase();
         if (remote) {
           setProfile(remote);
@@ -213,11 +217,15 @@ export function App() {
         } else {
           saveProfileToSupabase(profile, currentUser.id);
         }
-        if (event === 'SIGNED_IN') {
+
+        if (event === 'SIGNED_IN' && !hasShownWelcomeRef.current) {
+          hasShownWelcomeRef.current = true;
+          setActiveTab('editor');
           showToast(`👋 ¡Bienvenido, ${currentUser.user_metadata?.full_name || currentUser.email || 'Usuario'}!`);
           handleSyncHistory(currentUser);
         }
       } else if (event === 'SIGNED_OUT') {
+        hasShownWelcomeRef.current = false;
         setIsCloudConnected(false);
         setIsGuestMode(false);
         sessionStorage.removeItem('cotizaya_guest_access');
@@ -264,8 +272,11 @@ export function App() {
       setUser(res.user);
       setIsCloudConnected(true);
       setIsGuestMode(false);
-      setActiveTab('editor');
-      showToast(`👋 ¡Bienvenido, ${res.user.email}!`);
+      if (!hasShownWelcomeRef.current) {
+        hasShownWelcomeRef.current = true;
+        setActiveTab('editor');
+        showToast(`👋 ¡Bienvenido, ${res.user.email}!`);
+      }
       handleSyncHistory(res.user);
     }
   };
@@ -275,6 +286,7 @@ export function App() {
   };
 
   const handleSignOut = async () => {
+    hasShownWelcomeRef.current = false;
     await signOut();
     setUser(null);
     setIsCloudConnected(false);
@@ -425,15 +437,17 @@ export function App() {
         showExtendedTabs={Boolean(user)}
         isWelcomeScreen={!user && !isGuestMode}
         onGoToWelcome={() => setIsGuestMode(false)}
+        onOpenFreemiumWall={() => setShowFreemiumWall(true)}
+        subscriptionTier={profile.subscription_tier || 'free'}
       />
 
-      {/* Toast Notification */}
+      {/* Toast Notification (Ubicado en la parte SUPERIOR de la página) */}
       {toastMessage && (
         <div
-          className={`fixed bottom-20 left-4 right-4 z-50 text-white text-sm font-bold px-4 py-3 rounded-2xl shadow-xl text-center transition-all
+          className={`fixed top-20 left-1/2 -translate-x-1/2 z-50 text-xs sm:text-sm font-extrabold px-5 py-3 rounded-2xl shadow-2xl border flex items-center justify-center gap-2 backdrop-blur-md transition-all duration-300 animate-in fade-in slide-in-from-top-4 max-w-md w-[92%] sm:w-auto text-center
             ${toastType === 'error'
-              ? 'bg-red-600 border border-red-500'
-              : 'bg-slate-900 border border-slate-700'
+              ? 'bg-red-900/95 dark:bg-red-950/95 border-red-500/80 text-white shadow-red-950/40'
+              : 'bg-slate-900/95 dark:bg-slate-800/95 border-emerald-500/80 text-emerald-300 shadow-emerald-950/30'
             }`}
         >
           {toastMessage}
@@ -482,6 +496,7 @@ export function App() {
           <WelcomeLanding
             onOpenAuthModal={() => setShowAuthModal(true)}
             onEnterGuest={handleEnterGuest}
+            onOpenFreemiumWall={() => setShowFreemiumWall(true)}
           />
         ) : (
           <>
