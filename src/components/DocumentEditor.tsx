@@ -1,5 +1,5 @@
 import React from 'react';
-import type { QuoteDocument, BusinessProfile, QuoteItem } from '../types';
+import type { QuoteDocument, BusinessProfile, QuoteItem, QuoteValidationErrors } from '../types';
 import { 
   FileText, 
   Receipt, 
@@ -14,7 +14,8 @@ import {
   Save, 
   RotateCcw,
   Sparkles,
-  Globe
+  Globe,
+  AlertCircle
 } from 'lucide-react';
 import { 
   SUPPORTED_CURRENCIES, 
@@ -26,6 +27,7 @@ interface DocumentEditorProps {
   quote: QuoteDocument;
   setQuote: React.Dispatch<React.SetStateAction<QuoteDocument>>;
   profile: BusinessProfile;
+  validationErrors?: QuoteValidationErrors;
   onUpdateProfileCurrency: (symbol: string) => void;
   onGoToPreview: () => void;
   onSaveDraft: () => void;
@@ -51,6 +53,7 @@ export const DocumentEditor: React.FC<DocumentEditorProps> = ({
   quote,
   setQuote,
   profile,
+  validationErrors = {},
   onUpdateProfileCurrency,
   onGoToPreview,
   onSaveDraft,
@@ -333,8 +336,18 @@ export const DocumentEditor: React.FC<DocumentEditorProps> = ({
               value={quote.client_name}
               onChange={handleClientChange}
               placeholder="Ej: Inversiones Globales S.A. / Andrés Gómez"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+              className={`w-full px-3.5 py-2.5 rounded-xl border text-sm font-semibold text-slate-900 focus:outline-none focus:ring-2 ${
+                validationErrors.client_name
+                  ? 'border-red-400 bg-red-50/40 focus:border-red-500 focus:ring-red-500/20'
+                  : 'border-slate-300 focus:border-emerald-500 focus:ring-emerald-500/20'
+              }`}
             />
+            {validationErrors.client_name && (
+              <p className="mt-1 text-xs text-red-600 font-bold flex items-center gap-1">
+                <AlertCircle size={12} />
+                {validationErrors.client_name}
+              </p>
+            )}
           </div>
 
           <div>

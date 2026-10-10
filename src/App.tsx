@@ -8,7 +8,7 @@ import { SupabaseConfigModal } from './components/SupabaseConfigModal';
 import { EmptyState } from './components/EmptyState';
 import { FreemiumWall } from './components/FreemiumWall';
 import { PublicView } from './components/PublicView';
-import type { BusinessProfile, QuoteDocument } from './types';
+import type { BusinessProfile, QuoteDocument, QuoteValidationErrors } from './types';
 import { validateQuote, canGenerateDocument } from './types';
 import {
   loadProfile,
@@ -77,7 +77,7 @@ export function App() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<'success' | 'error'>('success');
   const [showFreemiumWall, setShowFreemiumWall] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [validationErrors, setValidationErrors] = useState<QuoteValidationErrors>({});
 
   const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
     setToastMessage(msg);
@@ -232,14 +232,6 @@ export function App() {
     showToast('Documento eliminado del historial');
   };
 
-  const handleQuoteChange = (updated: QuoteDocument) => {
-    setQuote(updated);
-    // Limpiar errores al editar
-    if (validationErrors && Object.keys(validationErrors).length > 0) {
-      setValidationErrors({});
-    }
-  };
-
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
@@ -281,7 +273,7 @@ export function App() {
         {activeTab === 'editor' && (
           <DocumentEditor
             quote={quote}
-            setQuote={handleQuoteChange}
+            setQuote={setQuote}
             profile={profile}
             validationErrors={validationErrors}
             onUpdateProfileCurrency={handleUpdateProfileCurrency}
