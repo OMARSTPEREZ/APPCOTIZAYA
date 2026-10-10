@@ -1,10 +1,14 @@
 import { createClient, type SupabaseClient, type User } from '@supabase/supabase-js';
 import type { BusinessProfile, QuoteDocument } from '../types';
 
+// Configuración directa de Supabase para CotizaRápido
+const DEFAULT_SUPABASE_URL = 'https://rnznvwniwcvljxdjpzib.supabase.co';
+const DEFAULT_SUPABASE_KEY = 'sb_publishable_ETHSJ80C_pX5HmS77fKwAQ_92ZF65aX';
+
 // Leer de variables de entorno o de configuración guardada en LocalStorage
 export const getSupabaseConfig = () => {
-  const envUrl = import.meta.env.VITE_SUPABASE_URL || '';
-  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+  const envUrl = import.meta.env.VITE_SUPABASE_URL || DEFAULT_SUPABASE_URL;
+  const envKey = import.meta.env.VITE_SUPABASE_ANON_KEY || DEFAULT_SUPABASE_KEY;
   const customUrl = localStorage.getItem('cotizarapido_sb_url') || '';
   const customKey = localStorage.getItem('cotizarapido_sb_key') || '';
 
