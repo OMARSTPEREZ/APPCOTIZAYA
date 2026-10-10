@@ -1,7 +1,7 @@
-// Service Worker básico para CotizaRápido PWA
-// Cache offline-first para assets estáticos
+// Service Worker para CotizaRápido PWA
+// Estrategia: Network-First (siempre obtiene la versión más reciente en vivo si hay internet, con fallback offline)
 
-const CACHE_NAME = 'cotizarapido-v1';
+const CACHE_NAME = 'cotizarapido-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -32,45 +32,31 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Solo manejar peticiones GET
   if (event.request.method !== 'GET') return;
 
-  // Estrategia: Network First para API, Cache First para assets
   const url = new URL(event.request.url);
-  const isSupabaseAPI = url.hostname.includes('supabase.co');
 
-  if (isSupabaseAPI) {
-    // Network first para Supabase
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match(event.request))
-    );
-  } else {
-    // Cache first para assets estáticos
-    event.respondWith(
-      caches.match(event.request).then((cached) => {
-        if (cached) return cached;
-        return fetch(event.request).then((response) => {
-          if (response.ok) {
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseClone);
-            });
+  // Network-First para todas las navegaciones y archivos HTML/JS
+  event.respondWith(
+    fetch(event.request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200) {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+        }
+        return networkResponse;
+      })
+      .catch(() => {
+        // Si no hay internet, usar la versión guardada en caché (Modo Offline)
+        return caches.match(event.request).then((cachedResponse) => {
+          if (cachedResponse) return cachedResponse;
+          if (event.request.mode === 'navigate') {
+            return caches.match('/index.html');
           }
-          return response;
+          return new Response('Sin conexión', { status: 503, statusText: 'Offline' });
         });
       })
-    );
-  }
-});
-
-// Notificaciones push (para futuras versiones Pro)
-self.addEventListener('push', (event) => {
-  const data = event.data?.json() || {};
-  event.waitUntil(
-    self.registration.showNotification(data.title || 'CotizaRápido', {
-      body: data.body || 'Tienes una actualización',
-      icon: '/icons/icon-192.png',
-      badge: '/icons/icon-72.png',
-    })
   );
 });

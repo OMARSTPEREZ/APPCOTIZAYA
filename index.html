@@ -58,6 +58,15 @@
   <body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>document.body.classList.add('ready');</script>
+    <script>
+      document.body.classList.add('ready');
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for (var r of registrations) {
+            r.update();
+          }
+        });
+      }
+    </script>
   </body>
 </html>
