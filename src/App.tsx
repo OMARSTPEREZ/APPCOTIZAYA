@@ -533,19 +533,18 @@ export function App() {
                 showToast('⚠️ No se completó la compra en la tienda nativa', 'error');
               }
             } else {
-              // 🌐 ENTORNO WEB / PWA (Pasarela de Pago Colombiana Mercado Pago / Bold / Wompi)
+              // 🌐 ENTORNO WEB / PWA (Pasarela de Pago Real Mercado Pago / Bold / Wompi)
+              const envMonthlyUrl = import.meta.env.VITE_MERCADOPAGO_MONTHLY_URL || 'https://mpago.li/cotizaya-pro-mensual';
+              const envAnnualUrl = import.meta.env.VITE_MERCADOPAGO_ANNUAL_URL || 'https://mpago.li/cotizaya-pro-anual';
               const customPaymentUrl = localStorage.getItem('cotizaya_custom_payment_url');
-              
-              if (customPaymentUrl) {
-                const returnUrl = encodeURIComponent(`${window.location.origin}/?payment_status=success&plan_activated=pro`);
-                const fullUrl = customPaymentUrl.includes('?') 
-                  ? `${customPaymentUrl}&redirect_url=${returnUrl}` 
-                  : `${customPaymentUrl}?redirect_url=${returnUrl}`;
-                window.open(fullUrl, '_blank');
-              } else {
-                // Si la URL es la plantilla de demostración, activa el Plan PRO en vivo con Confetti de inmediato
-                await handleActivateProPlan(user);
-              }
+
+              const targetUrl = customPaymentUrl || (plan === 'annual' ? envAnnualUrl : envMonthlyUrl);
+              const returnUrl = encodeURIComponent(`${window.location.origin}/?payment_status=success&plan_activated=pro`);
+              const fullRedirectUrl = targetUrl.includes('?') 
+                ? `${targetUrl}&redirect_url=${returnUrl}` 
+                : `${targetUrl}?redirect_url=${returnUrl}`;
+
+              window.open(fullRedirectUrl, '_blank');
             }
           }}
           onSyncProStatus={async () => {
