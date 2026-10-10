@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FREE_QUOTA_LIMIT } from '../types';
-import { Zap, X, Check, Star, Crown, Sparkles, Shield, Infinity, ExternalLink, Link2, ArrowLeft } from 'lucide-react';
+import { Zap, X, Check, Star, Crown, Sparkles, Shield, Infinity, ExternalLink, ArrowLeft } from 'lucide-react';
 
 interface FreemiumWallProps {
   usedCount: number;
@@ -12,8 +12,6 @@ interface FreemiumWallProps {
 export function FreemiumWall({ usedCount, onUpgrade, onClose, onSyncProStatus }: FreemiumWallProps) {
   const [step, setStep] = useState<1 | 2>(1);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
-  const [showCustomLinkInput, setShowCustomLinkInput] = useState(false);
-  const [customUrl, setCustomUrl] = useState(() => localStorage.getItem('cotizaya_custom_payment_url') || '');
 
   const plans = {
     monthly: { price: '$ 15.000', period: '/mes', savings: null, label: 'Mensual' },
@@ -24,15 +22,6 @@ export function FreemiumWall({ usedCount, onUpgrade, onClose, onSyncProStatus }:
 
   const handleUpgrade = (method: 'all' | 'nequi' | 'daviplata' | 'pse' | 'card' = 'all') => {
     if (onUpgrade) onUpgrade(billingCycle, method);
-  };
-
-  const handleSaveCustomUrl = () => {
-    if (customUrl.trim()) {
-      localStorage.setItem('cotizaya_custom_payment_url', customUrl.trim());
-    } else {
-      localStorage.removeItem('cotizaya_custom_payment_url');
-    }
-    setShowCustomLinkInput(false);
   };
 
   const isLimitReached = usedCount >= FREE_QUOTA_LIMIT;
@@ -274,49 +263,6 @@ export function FreemiumWall({ usedCount, onUpgrade, onClose, onSyncProStatus }:
               </button>
             </div>
           )}
-
-          {/* Configuración de Enlace Personalizado de Pago */}
-          <div className="text-center pt-1">
-            {showCustomLinkInput ? (
-              <div className="p-3 bg-slate-50 dark:bg-slate-800/80 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2 text-left">
-                <label className="text-[11px] font-bold text-slate-600 dark:text-slate-300 block">
-                  Pega tu Link Real de Mercado Pago / Pasarela de Pago:
-                </label>
-                <input
-                  type="url"
-                  placeholder="https://mpago.li/tu-link-real-de-pago"
-                  value={customUrl}
-                  onChange={(e) => setCustomUrl(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
-                />
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={handleSaveCustomUrl}
-                    className="flex-1 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition cursor-pointer"
-                  >
-                    Guardar Link
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setShowCustomLinkInput(false)}
-                    className="py-1.5 px-3 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition cursor-pointer"
-                  >
-                    Cancelar
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setShowCustomLinkInput(true)}
-                className="inline-flex items-center gap-1 text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition cursor-pointer"
-              >
-                <Link2 size={10} />
-                {localStorage.getItem('cotizaya_custom_payment_url') ? '✏️ Link de pago personalizado configurado' : '⚙️ Configurar Link Personalizado de Pago'}
-              </button>
-            )}
-          </div>
 
           {/* Opciones de Soporte y Cierre */}
           <div className="flex flex-col items-center gap-1.5 pt-1 border-t border-slate-100 dark:border-slate-800">
