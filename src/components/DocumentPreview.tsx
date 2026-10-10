@@ -348,7 +348,7 @@ export const DocumentPreview: React.FC<DocumentPreviewProps> = ({
         </div>
       </div>
 
-      {/* Modal Inteligente de WhatsApp */}
+      {/* Modal de WhatsApp */}
       <WhatsAppModal
         isOpen={isWhatsAppModalOpen}
         onClose={() => setIsWhatsAppModalOpen(false)}

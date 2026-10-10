@@ -38,7 +38,7 @@ export const WHATSAPP_TEMPLATES: WhatsAppTemplate[] = [
 ];
 
 /**
- * Genera el texto inteligente para WhatsApp según el tono seleccionado
+ * Genera el texto profesional para WhatsApp según la plantilla seleccionada
  */
 export const generateWhatsAppMessage = (
   quote: QuoteDocument,

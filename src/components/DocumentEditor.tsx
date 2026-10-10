@@ -378,7 +378,7 @@ export const DocumentEditor: React.FC<DocumentEditorProps> = ({
               />
             </div>
             <p className="text-[10px] text-slate-400 mt-1">
-              Permitirá enviarle el auto-mensaje inteligente al chat de WhatsApp con 1 clic.
+              Permitirá enviarle el mensaje automático al chat de WhatsApp con 1 clic.
             </p>
           </div>
 

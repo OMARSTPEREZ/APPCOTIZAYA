@@ -69,7 +69,7 @@ export const WhatsAppModal: React.FC<WhatsAppModalProps> = ({
               <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-1.5">
                 Auto-Mensaje para WhatsApp
                 <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                  Inteligente
+                  Profesional
                 </span>
               </h3>
               <p className="text-xs text-slate-500">

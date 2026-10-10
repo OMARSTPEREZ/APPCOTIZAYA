@@ -5,7 +5,6 @@ import { BusinessProfileModal } from './components/BusinessProfileModal';
 import { DocumentEditor } from './components/DocumentEditor';
 import { DocumentPreview } from './components/DocumentPreview';
 import { DocumentHistory } from './components/DocumentHistory';
-import { SupabaseConfigModal } from './components/SupabaseConfigModal';
 import { EmptyState } from './components/EmptyState';
 import { FreemiumWall } from './components/FreemiumWall';
 import { PublicView } from './components/PublicView';
@@ -29,6 +28,8 @@ import {
   syncLocalHistoryWithSupabase,
   fetchQuotesFromSupabase,
   signInWithGoogle,
+  signInWithEmail,
+  signUpWithEmail,
   signOut,
   getCurrentUser,
   fetchProfileFromSupabase
@@ -78,7 +79,7 @@ export function App() {
   }
 
   // ── Estado principal (Offline-First por defecto) ───────────────────────────
-  const [activeTab, setActiveTab] = useState<'editor' | 'preview' | 'business' | 'history' | 'cloud'>('editor');
+  const [activeTab, setActiveTab] = useState<'editor' | 'preview' | 'business' | 'history'>('editor');
   const [profile, setProfile] = useState<BusinessProfile>(() => loadProfile());
   const [history, setHistory] = useState<QuoteDocument[]>(() => loadHistory());
   const [quote, setQuote] = useState<QuoteDocument>(() => {
@@ -129,7 +130,7 @@ export function App() {
           saveFullHistory(merged);
         }
       }
-      showToast(`☁️ ¡Historial respaldado en Google con éxito! (${uploaded} documentos sincronizados)`);
+      showToast(`☁️ ¡Historial respaldado con éxito! (${uploaded} documentos sincronizados)`);
     } catch (err) {
       console.warn('Sync notice:', err);
       showToast('⚠️ Datos guardados localmente');
@@ -185,7 +186,7 @@ export function App() {
           saveProfileToSupabase(profile, currentUser.id);
         }
         if (event === 'SIGNED_IN') {
-          showToast(`👋 ¡Bienvenido, ${currentUser.user_metadata?.full_name || 'Usuario'}!`);
+          showToast(`👋 ¡Bienvenido, ${currentUser.user_metadata?.full_name || currentUser.email || 'Usuario'}!`);
           handleSyncHistory(currentUser);
         }
       } else if (event === 'SIGNED_OUT') {
@@ -223,6 +224,20 @@ export function App() {
     } finally {
       setIsAuthLoading(false);
     }
+  };
+
+  const handleSignInWithEmail = async (emailVal: string, passVal: string) => {
+    const res = await signInWithEmail(emailVal, passVal);
+    if (res?.user) {
+      setUser(res.user);
+      setIsCloudConnected(true);
+      showToast(`👋 ¡Bienvenido, ${res.user.email}!`);
+      handleSyncHistory(res.user);
+    }
+  };
+
+  const handleSignUpWithEmail = async (emailVal: string, passVal: string) => {
+    await signUpWithEmail(emailVal, passVal);
   };
 
   const handleSignOut = async () => {
@@ -362,7 +377,6 @@ export function App() {
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        isCloudConnected={isCloudConnected}
         itemCount={quote.items.length}
         user={user}
         onOpenAuthModal={() => setShowAuthModal(true)}
@@ -382,11 +396,13 @@ export function App() {
         </div>
       )}
 
-      {/* Modal de Autenticación con Google / Modo Invitado */}
+      {/* Modal de Autenticación Completo (Google + Correo/Contraseña + Modo Invitado) */}
       <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         onSignInWithGoogle={handleSignInWithGoogle}
+        onSignInWithEmail={handleSignInWithEmail}
+        onSignUpWithEmail={handleSignUpWithEmail}
         isConnecting={isAuthLoading}
       />
 
@@ -460,12 +476,6 @@ export function App() {
               onConvertToInvoice={handleConvertToInvoice}
             />
           )
-        )}
-
-        {activeTab === 'cloud' && (
-          <SupabaseConfigModal
-            onConnectionChange={(connected) => setIsCloudConnected(connected)}
-          />
         )}
       </main>
 
