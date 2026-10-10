@@ -6,9 +6,10 @@ interface FreemiumWallProps {
   usedCount: number;
   onUpgrade?: (plan: 'monthly' | 'annual') => void;
   onClose?: () => void;
+  onSyncProStatus?: () => void;
 }
 
-export function FreemiumWall({ usedCount, onUpgrade, onClose }: FreemiumWallProps) {
+export function FreemiumWall({ usedCount, onUpgrade, onClose, onSyncProStatus }: FreemiumWallProps) {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
 
   const plans = {
@@ -156,16 +157,30 @@ export function FreemiumWall({ usedCount, onUpgrade, onClose }: FreemiumWallProp
           </button>
 
           {/* Métodos de pago */}
-          <div className="text-center space-y-1">
+          <div className="text-center space-y-2 pt-1">
             <p className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
-              🇨🇴 Mercado Pago · Nequi · PSE · Tarjeta
+              🇨🇴 Mercado Pago · Nequi · PSE · Tarjetas · In-App Purchase
             </p>
-            <button
-              onClick={onClose}
-              className="text-xs font-medium text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition"
-            >
-              Quedarse con el plan Free
-            </button>
+            <div className="flex flex-col items-center gap-1.5 pt-1">
+              {onSyncProStatus && (
+                <button
+                  type="button"
+                  onClick={onSyncProStatus}
+                  className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline transition cursor-pointer"
+                >
+                  ¿Ya pagaste o activaste tu plan? Sincronizar estado PRO ⚡
+                </button>
+              )}
+              {onClose && (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="text-xs font-medium text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition cursor-pointer"
+                >
+                  Quedarse con el plan Free
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -131,6 +131,44 @@ export function App() {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
+  // ── Activación Centralizada del Plan PRO (Sincronización Web + Nube + Tiendas Nativas) ──
+  const handleActivateProPlan = async (targetUser?: SupabaseUser | null) => {
+    const updatedProfile = {
+      ...loadProfile(),
+      subscription_tier: 'pro' as const,
+    };
+    setProfile(updatedProfile);
+    saveProfile(updatedProfile);
+
+    const activeUser = targetUser || user;
+    if (activeUser) {
+      await saveProfileToSupabase(updatedProfile, activeUser.id);
+    }
+
+    confetti({
+      particleCount: 150,
+      spread: 90,
+      origin: { y: 0.5 },
+    });
+
+    showToast('🎉 ¡Felicitaciones! Tu Plan PRO ha sido activado con éxito. Cotizaciones e impresiones ilimitadas.', 'success');
+  };
+
+  // ── Detección de retorno de pasarela de pago (Callback automático Web / PWA) ──
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('payment_status') || params.get('status') || params.get('collection_status');
+    const isProReturn = params.get('plan_activated') === 'pro' || status === 'approved' || status === 'success';
+
+    if (isProReturn) {
+      getCurrentUser().then((currentUser) => {
+        handleActivateProPlan(currentUser);
+      });
+      // Limpiar la URL sin recargar
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
   // Función para sincronizar historial local con la nube de Google / Supabase (Silencioso por defecto)
   const handleSyncHistory = async (targetUser?: SupabaseUser | null, silent = true) => {
     const activeUser = targetUser || user;
@@ -465,25 +503,57 @@ export function App() {
         onContinueAsGuest={handleEnterGuest}
       />
 
-      {/* Muro de pago Freemium */}
+      {/* Muro de pago Freemium Híbrido (Web vs Tiendas Nativas) */}
       {showFreemiumWall && (
         <FreemiumWall
           usedCount={profile.monthly_quote_count || 0}
-          onUpgrade={(plan) => {
+          onUpgrade={async (plan) => {
             setShowFreemiumWall(false);
-            // Detección de entorno: web vs nativo
-            const isAndroidApp = (window as any).Android !== undefined;
-            const isIOSApp = (window as any).webkit?.messageHandlers !== undefined;
-            if (isAndroidApp) {
-              (window as any).Android.openBillingFlow?.(plan);
-            } else if (isIOSApp) {
-              (window as any).webkit.messageHandlers.billing?.postMessage({ plan });
+            const win = window as any;
+            const isCapacitorNative = win.Capacitor?.isNativePlatform?.();
+            const isAndroidApp = win.Android !== undefined;
+            const isIOSApp = win.webkit?.messageHandlers?.billing !== undefined;
+
+            if (isCapacitorNative || isAndroidApp || isIOSApp) {
+              // 📱 ENTORNO NATIVO (Apple In-App Purchase / Google Play Billing)
+              try {
+                if (win.Capacitor?.Plugins?.NativePurchases) {
+                  const productId = plan === 'annual' ? 'cotizaya_pro_annual' : 'cotizaya_pro_monthly';
+                  await win.Capacitor.Plugins.NativePurchases.purchase({ productIdentifier: productId });
+                  await handleActivateProPlan(user);
+                } else if (isAndroidApp) {
+                  win.Android.openBillingFlow?.(plan);
+                  win.onNativeBillingSuccess = () => handleActivateProPlan(user);
+                } else if (isIOSApp) {
+                  win.webkit.messageHandlers.billing.postMessage({ plan, action: 'purchase' });
+                  win.onNativeBillingSuccess = () => handleActivateProPlan(user);
+                }
+              } catch (err) {
+                console.warn('Native billing notice:', err);
+                showToast('⚠️ No se completó la compra en la tienda nativa', 'error');
+              }
             } else {
-              // Web: redirigir a pasarela de pago
-              const url = plan === 'annual'
-                ? 'https://mpago.la/cotizaya-pro-anual'
-                : 'https://mpago.la/cotizaya-pro-mensual';
-              window.open(url, '_blank');
+              // 🌐 ENTORNO WEB / PWA (Pasarela de Pago Colombiana Mercado Pago / Bold / Wompi)
+              const returnUrl = encodeURIComponent(`${window.location.origin}/?payment_status=success&plan_activated=pro`);
+              const webUrl = plan === 'annual'
+                ? `https://mpago.la/cotizaya-pro-anual?redirect_url=${returnUrl}`
+                : `https://mpago.la/cotizaya-pro-mensual?redirect_url=${returnUrl}`;
+              
+              window.open(webUrl, '_blank');
+            }
+          }}
+          onSyncProStatus={async () => {
+            setShowFreemiumWall(false);
+            if (!user) {
+              setShowAuthModal(true);
+              return;
+            }
+            // Consultar estado de suscripción remoto en Supabase
+            const remoteProfile = await fetchProfileFromSupabase();
+            if (remoteProfile?.subscription_tier === 'pro') {
+              await handleActivateProPlan(user);
+            } else {
+              showToast('ℹ️ Aún no registramos un pago activo en la cuenta.', 'error');
             }
           }}
           onClose={() => setShowFreemiumWall(false)}
