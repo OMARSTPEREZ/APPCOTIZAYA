@@ -507,7 +507,7 @@ export function App() {
       {showFreemiumWall && (
         <FreemiumWall
           usedCount={profile.monthly_quote_count || 0}
-          onUpgrade={async (plan) => {
+          onUpgrade={(plan, method) => {
             setShowFreemiumWall(false);
             const win = window as any;
             const isCapacitorNative = win.Capacitor?.isNativePlatform?.();
@@ -519,8 +519,9 @@ export function App() {
               try {
                 if (win.Capacitor?.Plugins?.NativePurchases) {
                   const productId = plan === 'annual' ? 'cotizaya_pro_annual' : 'cotizaya_pro_monthly';
-                  await win.Capacitor.Plugins.NativePurchases.purchase({ productIdentifier: productId });
-                  await handleActivateProPlan(user);
+                  win.Capacitor.Plugins.NativePurchases.purchase({ productIdentifier: productId }).then(() => {
+                    handleActivateProPlan(user);
+                  });
                 } else if (isAndroidApp) {
                   win.Android.openBillingFlow?.(plan);
                   win.onNativeBillingSuccess = () => handleActivateProPlan(user);
@@ -533,20 +534,32 @@ export function App() {
                 showToast('⚠️ No se completó la compra en la tienda nativa', 'error');
               }
             } else {
-              // 🌐 ENTORNO WEB / PWA (Pasarela de Pago Real Mercado Pago / Bold / Wompi)
+              // 🌐 ENTORNO WEB / PWA (Pasarela de Pago Real Mercado Pago / Bold / Wompi / PSE)
               const envMonthlyUrl = import.meta.env.VITE_MERCADOPAGO_MONTHLY_URL || 'https://mpago.li/cotizaya-pro-mensual';
               const envAnnualUrl = import.meta.env.VITE_MERCADOPAGO_ANNUAL_URL || 'https://mpago.li/cotizaya-pro-anual';
               const customPaymentUrl = localStorage.getItem('cotizaya_custom_payment_url');
 
-              const targetUrl = customPaymentUrl || (plan === 'annual' ? envAnnualUrl : envMonthlyUrl);
+              let targetUrl = customPaymentUrl || (plan === 'annual' ? envAnnualUrl : envMonthlyUrl);
+              
+              if (method && method !== 'all') {
+                const sep = targetUrl.includes('?') ? '&' : '?';
+                targetUrl = `${targetUrl}${sep}method=${method}`;
+              }
+
               const returnUrl = encodeURIComponent(`${window.location.origin}/?payment_status=success&plan_activated=pro`);
               const fullRedirectUrl = targetUrl.includes('?') 
                 ? `${targetUrl}&redirect_url=${returnUrl}` 
                 : `${targetUrl}?redirect_url=${returnUrl}`;
 
-              window.open(fullRedirectUrl, '_blank');
+              // Abrir en NUEVA PESTAÑA de forma directa e inmediata
+              const popup = window.open(fullRedirectUrl, '_blank', 'noopener,noreferrer');
+              if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+                // Respaldo en caso de bloqueo de ventanas emergentes en navegadores estrictos
+                window.location.href = fullRedirectUrl;
+              }
             }
           }}
+
           onSyncProStatus={async () => {
             setShowFreemiumWall(false);
             if (!user) {
